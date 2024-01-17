@@ -1,0 +1,593 @@
+---
+title: "Analysis"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+
+
+data_fenz <- read.csv("FENZStructureFiredata_with2018MeshblockIDs.csv")
+census_dwellings <- read.csv("Census/2018-SA1-dataset-dwellings-total-NZ_Formatted.csv")
+census_dwellings_header <- read.csv("Census/Headers_dwellings.csv")
+mb_sa1 <- read.csv("2018CensusMeshblock_and_correspondingSA1_IDs.csv")
+
+census_individual_part2 <- read.csv("Census/2018-SA1-dataset-individual-part-2-total-NZ_Formatted_Totals.csv")
+
+
+```
+
+```{r}
+
+# Extract impact data from FENZ info
+
+#colnames(data_fenz)
+
+data_fenz_impacts <- data_fenz[c(
+  'Incident_ID',
+  'First_Arrival_Time',
+  'Incident_Type_Name',
+  'General_Property_Use_Group_Name',     
+  'General_Property_Use_Name',      
+  'Specific_Property_Use_Group_Parent_Name',
+  'Specific_Property_Use_Group_Name',
+  'Specific_Property_Use_Name',
+  'Fire_Cause_Group_Name',
+  'Heat_Source_Group_Name',
+  'Origin_Group_Name',
+  'Flame_Damage_Name',           
+  'Percent_of_Property_Saved_Name',
+  'Flame_Damage__m2_',
+  'Floor_Area__m2_',
+  'Numfloors',
+  'Structure_Area__m2_',              
+  'Casualty_Count',
+  'Fatality_Count',                
+  'Critical_Injury_Count',
+  'Serious_Injury_Count',           
+  'Moderate_Injury_Count',
+  'Minor_Injury_Count',                  
+  'Unclassified_Injury_Count',
+  'MeshblockID2018'
+)]
+
+
+# Add SA1 info
+library(dplyr)
+data_fenz_impacts <- data_fenz_impacts %>% inner_join( mb_sa1, 
+        by = c('MeshblockID2018'='MB2018_V1_'))
+
+
+# Extract residential
+unique(data_fenz_impacts$General_Property_Use_Group_Name)
+data_fenz_impacts_res <- data_fenz_impacts[data_fenz_impacts$General_Property_Use_Group_Name == 'Residential',]
+
+
+
+
+```
+
+```{r}
+
+# Analyse FENZ impact data (residential)
+
+  hist(data_fenz_impacts_res$Casualty_Count)
+  hist(data_fenz_impacts_res$Fatality_Count)
+  
+  #event_with_casulties
+  
+  sum(data_fenz_impacts_res$Casualty_Count)                                                                       # total casualties
+  sum(data_fenz_impacts_res$Casualty_Count > 0, na.rm=TRUE)                                                       # event count with casualties
+  percentage_events_casualties <- (sum(data_fenz_impacts_res$Casualty_Count > 0, na.rm=TRUE)/length(data_fenz_impacts_res$Casualty_Count)) * 100  
+  percentage_events_fatalities <- (sum(data_fenz_impacts_res$Fatality_Count > 0, na.rm=TRUE)/length(data_fenz_impacts_res$Fatality_Count)) * 100  
+
+
+```
+
+Analysis 1 - Dwelling type
+```{r}
+
+# 11	2018	occupied private dwelling type	Separate house
+# 12	2018	occupied private dwelling type	Joined dwelling
+# 13	2018	occupied private dwelling type	Other private dwelling
+# 14	2018	occupied private dwelling type	Private dwelling not further defined
+# 15	2018	occupied private dwelling type	Total
+
+# calculate percentages
+dwellingType.2018 <- census_dwellings[c('SA1','c11','c12','c13','c14','c15')]
+dwellingType.2018$separateHouse <- as.integer((dwellingType.2018$c11/dwellingType.2018$c15) * 100)
+dwellingType.2018$joinedDwelling <- as.integer((dwellingType.2018$c12/dwellingType.2018$c15) * 100)
+dwellingType.2018$other <- as.integer((dwellingType.2018$c13/dwellingType.2018$c15) * 100)
+dwellingType.2018$notDefined <- as.integer((dwellingType.2018$c14/dwellingType.2018$c15) * 100)
+
+dwellingType.2018$separateHouse[is.na(dwellingType.2018$separateHouse)] = 0
+dwellingType.2018$joinedDwelling[is.na(dwellingType.2018$joinedDwelling)] = 0
+dwellingType.2018$other[is.na(dwellingType.2018$other)] = 0
+dwellingType.2018$notDefined[is.na(dwellingType.2018$notDefined)] = 0
+
+#plot
+hist(dwellingType.2018$separateHouse)
+hist(dwellingType.2018$joinedDwelling)
+hist(dwellingType.2018$other)
+hist(dwellingType.2018$notDefined)
+
+# join to FENZ data
+data_fenz_impacts_res_dwellingType <- data_fenz_impacts_res %>% inner_join( dwellingType.2018, 
+        by = c('SA12018_V1'='SA1'))
+
+
+min_percentage <- c(0,10,20,30,40,50,60,70,80,90)
+max_percentage <- c(10,20,30,40,50,60,70,80,90,100)
+bin <- c("0-10%","10-20%","20-30%","30-40%","40-50%","50-60%","60-70%","70-80%","80-90%","90-100%")
+
+stats <- data.frame(bin)
+
+
+for (i in 1:length(min_percentage)) { 
+    
+  # Seperate house
+  stats$casualties.separateHouse[i] <-
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$Casualty_Count > 0 &
+    data_fenz_impacts_res_dwellingType$separateHouse > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$separateHouse <= max_percentage[i], ]) /
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$separateHouse > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$separateHouse <= max_percentage[i], ]) * 100
+  stats$casualities.separateHouse.n[i] <-
+    nrow(data_fenz_impacts_res_dwellingType[data_fenz_impacts_res_dwellingType$Casualty_Count > 0 &
+    data_fenz_impacts_res_dwellingType$separateHouse > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$separateHouse <= max_percentage[i], ])
+  
+  stats$fatalities.separateHouse[i] <-
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$Fatality_Count > 0 &
+    data_fenz_impacts_res_dwellingType$separateHouse > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$separateHouse <= max_percentage[i], ]) /
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$separateHouse > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$separateHouse <= max_percentage[i], ]) * 100
+  stats$fatalities.separateHouse.n[i] <-
+    nrow(data_fenz_impacts_res_dwellingType[data_fenz_impacts_res_dwellingType$Fatality_Count > 0 &
+    data_fenz_impacts_res_dwellingType$separateHouse > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$separateHouse <= max_percentage[i], ])
+  
+  # Joined dwellings
+  stats$casualties.joinedDwelling[i] <-
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$Casualty_Count > 0 &
+    data_fenz_impacts_res_dwellingType$joinedDwelling > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$joinedDwelling <= max_percentage[i], ]) /
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$joinedDwelling > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$joinedDwelling <= max_percentage[i], ]) * 100
+  stats$casualities.joinedDwelling.n[i] <-
+    nrow(data_fenz_impacts_res_dwellingType[data_fenz_impacts_res_dwellingType$Casualty_Count > 0 &
+    data_fenz_impacts_res_dwellingType$joinedDwelling > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$joinedDwelling <= max_percentage[i], ])
+  
+  stats$fatalities.joinedDwelling[i] <-
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$Fatality_Count > 0 &
+    data_fenz_impacts_res_dwellingType$joinedDwelling > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$joinedDwelling <= max_percentage[i], ]) /
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$joinedDwelling > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$joinedDwelling <= max_percentage[i], ]) * 100
+  stats$fatalities.joinedDwelling.n[i] <-
+    nrow(data_fenz_impacts_res_dwellingType[data_fenz_impacts_res_dwellingType$Fatality_Count > 0 &
+    data_fenz_impacts_res_dwellingType$joinedDwelling > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$joinedDwelling <= max_percentage[i], ])
+    
+}
+
+#Plots
+library(ggplot2)
+library(ggrepel)
+
+# Separate house / casualties
+ggplot(stats, aes(bin,casualties.separateHouse)) +
+  geom_point() +
+  geom_text_repel(aes(label = casualities.separateHouse.n), size=3) +
+  xlab("% of seperate houses in SA1") + ylab("% of events with casualties") +
+  geom_hline(yintercept=percentage_events_casualties, linetype="dashed", color = "red") 
+
+# Seperate / fatalities
+ggplot(stats, aes(bin,fatalities.separateHouse)) +
+  geom_point() +
+  geom_text_repel(aes(label = fatalities.separateHouse.n), size=3) +
+  xlab("% of seperate houses in SA1") + ylab("% of events with fatalities") +
+  geom_hline(yintercept=percentage_events_fatalities, linetype="dashed", color = "red") 
+
+# Joined dwellings / casualties
+ggplot(stats, aes(bin,casualties.joinedDwelling)) +
+  geom_point() +
+  geom_text_repel(aes(label = casualities.joinedDwelling.n), size=3) +
+  xlab("% of joined dwellings in SA1") + ylab("% of events with casualties") +
+  geom_hline(yintercept=percentage_events_casualties, linetype="dashed", color = "red") 
+
+# Joined dwellings / fatalities
+ggplot(stats, aes(bin,fatalities.joinedDwelling)) +
+  geom_point() +
+  geom_text_repel(aes(label = fatalities.joinedDwelling.n), size=3) +
+  xlab("% of joined dwellings in SA1") + ylab("% of events with fatalities") +
+  geom_hline(yintercept=percentage_events_fatalities, linetype="dashed", color = "red") 
+
+
+```
+
+Analysis 2 - Main heating type
+```{r}
+#c86	2018	main types of heating used to heat dwellings for occupied private dwellings  	No heating used
+#c87	2018	main types of heating used to heat dwellings for occupied private dwellings  	Heat pump
+#c88	2018	main types of heating used to heat dwellings for occupied private dwellings  	Electric heater
+#c89	2018	main types of heating used to heat dwellings for occupied private dwellings  	Fixed gas heater
+#c90	2018	main types of heating used to heat dwellings for occupied private dwellings  	Portable gas heater
+#c91	2018	main types of heating used to heat dwellings for occupied private dwellings  	Wood burner
+#c92	2018	main types of heating used to heat dwellings for occupied private dwellings  	Pellet fire
+#c93	2018	main types of heating used to heat dwellings for occupied private dwellings  	Coal burner
+#c94	2018	main types of heating used to heat dwellings for occupied private dwellings  	Other types of heating
+#c95	2018	main types of heating used to heat dwellings for occupied private dwellings  	Total stated
+#c96	2018	main types of heating used to heat dwellings for occupied private dwellings  	Not elsewhere included
+#c97	2018	main types of heating used to heat dwellings for occupied private dwellings  	Total
+
+
+# calculate percentages
+heatingType.2018 <- census_dwellings[c('SA1','c86','c87','c88','c89','c90','c91','c92','c93','c94','c95','c96','c97')]
+heatingType.2018$noHeating <- as.integer((heatingType.2018$c86/heatingType.2018$c97) * 100)
+heatingType.2018$heatPump <- as.integer((heatingType.2018$c87/heatingType.2018$c97) * 100)
+heatingType.2018$electricHeater <- as.integer((heatingType.2018$c88/heatingType.2018$c97) * 100)
+heatingType.2018$fixedGasHeater <- as.integer((heatingType.2018$c89/heatingType.2018$c97) * 100)
+heatingType.2018$portableGasHeater <- as.integer((heatingType.2018$c90/heatingType.2018$c97) * 100)
+heatingType.2018$woodBurner <- as.integer((heatingType.2018$c91/heatingType.2018$c97) * 100)
+heatingType.2018$pelletFire <- as.integer((heatingType.2018$c92/heatingType.2018$c97) * 100)
+heatingType.2018$coalBurner <- as.integer((heatingType.2018$c93/heatingType.2018$c97) * 100)
+heatingType.2018$other <- as.integer((heatingType.2018$c94/heatingType.2018$c97) * 100)
+
+heatingType.2018$noHeating[is.na(heatingType.2018$noHeating)] = 0
+heatingType.2018$heatPump[is.na(heatingType.2018$heatPump)] = 0
+heatingType.2018$electricHeater[is.na(heatingType.2018$electricHeater)] = 0
+heatingType.2018$fixedGasHeater[is.na(heatingType.2018$fixedGasHeater)] = 0
+heatingType.2018$portableGasHeater[is.na(heatingType.2018$portableGasHeater)] = 0
+heatingType.2018$woodBurner[is.na(heatingType.2018$woodBurner)] = 0
+heatingType.2018$pelletFire[is.na(heatingType.2018$pelletFire)] = 0
+heatingType.2018$coalBurner[is.na(heatingType.2018$coalBurner)] = 0
+heatingType.2018$other[is.na(heatingType.2018$other)] = 0
+
+#plot
+hist(heatingType.2018$noHeating)
+hist(heatingType.2018$heatPump)
+hist(heatingType.2018$electricHeater)
+hist(heatingType.2018$fixedGasHeater)
+hist(heatingType.2018$portableGasHeater)
+hist(heatingType.2018$woodBurner)
+hist(heatingType.2018$pelletFire)
+hist(heatingType.2018$coalBurner)
+hist(heatingType.2018$other)
+
+# join to FENZ data
+data_fenz_impacts_res_heatingType <- data_fenz_impacts_res %>% inner_join( heatingType.2018, 
+        by = c('SA12018_V1'='SA1'))
+
+min_percentage <- c(0,10,20,30,40,50,60,70,80,90)
+max_percentage <- c(10,20,30,40,50,60,70,80,90,100)
+bin <- c("0-10%","10-20%","20-30%","30-40%","40-50%","50-60%","60-70%","70-80%","80-90%","90-100%")
+
+stats <- data.frame(bin)
+
+
+for (i in 1:length(min_percentage)) { 
+    
+  # No heating
+  stats$casualties.noHeating[i] <-
+    nrow(data_fenz_impacts_res_heatingType[
+    data_fenz_impacts_res_heatingType$Casualty_Count > 0 &
+    data_fenz_impacts_res_heatingType$noHeating > min_percentage[i] &
+    data_fenz_impacts_res_heatingType$noHeating <= max_percentage[i], ]) /
+    nrow(data_fenz_impacts_res_heatingType[
+    data_fenz_impacts_res_heatingType$noHeating > min_percentage[i] &
+    data_fenz_impacts_res_heatingType$noHeating <= max_percentage[i], ]) * 100
+  stats$casualities.noHeating.n[i] <-
+    nrow(data_fenz_impacts_res_heatingType[
+    data_fenz_impacts_res_heatingType$Casualty_Count > 0 &
+    data_fenz_impacts_res_heatingType$noHeating > min_percentage[i] &
+    data_fenz_impacts_res_heatingType$noHeating <= max_percentage[i], ])
+  
+  # Heat pump
+  stats$casualties.heatPump[i] <-
+    nrow(data_fenz_impacts_res_heatingType
+    [data_fenz_impacts_res_heatingType$Casualty_Count > 0 &
+    data_fenz_impacts_res_heatingType$heatPump > min_percentage[i] &
+    data_fenz_impacts_res_heatingType$heatPump <= max_percentage[i], ]) /
+    nrow(data_fenz_impacts_res_heatingType
+    [data_fenz_impacts_res_heatingType$heatPump > min_percentage[i] &
+    data_fenz_impacts_res_heatingType$heatPump <= max_percentage[i], ]) * 100
+  stats$casualities.heatPump.n[i] <-
+    nrow(data_fenz_impacts_res_heatingType[data_fenz_impacts_res_heatingType$Casualty_Count > 0 &
+    data_fenz_impacts_res_heatingType$heatPump > min_percentage[i] &
+    data_fenz_impacts_res_heatingType$heatPump <= max_percentage[i], ])
+  
+  # Electric Heater
+  stats$casualties.electricHeater[i] <-
+    nrow(data_fenz_impacts_res_heatingType
+    [data_fenz_impacts_res_heatingType$Casualty_Count > 0 &
+    data_fenz_impacts_res_heatingType$electricHeater > min_percentage[i] &
+    data_fenz_impacts_res_heatingType$electricHeater <= max_percentage[i], ]) /
+    nrow(data_fenz_impacts_res_heatingType
+    [data_fenz_impacts_res_heatingType$electricHeater > min_percentage[i] &
+    data_fenz_impacts_res_heatingType$electricHeater <= max_percentage[i], ]) * 100
+  stats$casualties.electricHeater.n[i] <-
+    nrow(data_fenz_impacts_res_heatingType[data_fenz_impacts_res_heatingType$Casualty_Count > 0 &
+    data_fenz_impacts_res_heatingType$electricHeater > min_percentage[i] &
+    data_fenz_impacts_res_heatingType$electricHeater <= max_percentage[i], ])
+  
+    
+}
+
+#Plots
+library(ggplot2)
+library(ggrepel)
+
+# No Heating / casualties
+ggplot(stats, aes(bin,casualties.noHeating)) +
+  geom_point(na.rm = TRUE) +
+  geom_text_repel(na.rm = TRUE, aes(label = casualities.noHeating.n), size=3) +
+  xlab("% of dwellings with no heating in SA1") + ylab("% of events with casualties") +
+  geom_hline(yintercept=percentage_events_casualties, linetype="dashed", color = "red") 
+
+# Heat pump / casualties
+ggplot(stats, aes(bin,casualties.heatPump)) +
+  geom_point() +
+  geom_text_repel(aes(label = casualities.heatPump.n), size=3) +
+  xlab("% of dwellings with heat pump in SA1") + ylab("% of events with casualties") +
+  geom_hline(yintercept=percentage_events_casualties, linetype="dashed", color = "red") 
+
+# Electric heater / casualties
+ggplot(stats, aes(bin,casualties.electricHeater)) +
+  geom_point() +
+  geom_text_repel(aes(label = casualties.electricHeater.n), size=3) +
+  xlab("% of dwellings with electric heater in SA1") + ylab("% of events with casualties") +
+  geom_hline(yintercept=percentage_events_casualties, linetype="dashed", color = "red") 
+
+
+```
+
+Analysis 3 - Smoking
+```{r}
+
+#52	2018	cigarette smoking behaviour aged 15 years and over	Regular smoker
+#53	2018	cigarette smoking behaviour aged 15 years and over	Ex-smoker
+#54	2018	cigarette smoking behaviour aged 15 years and over	Never smoked regularly
+#55	2018	cigarette smoking behaviour aged 15 years and over	Total stated
+#56	2018	cigarette smoking behaviour aged 15 years and over	Not elsewhere included
+#57	2018	cigarette smoking behaviour aged 15 years and over	Total
+
+
+# calculate percentages
+smoking.2018 <- census_individual_part2[c('sa1','c52','c55')]
+smoking.2018$regular <- as.integer((smoking.2018$c52/smoking.2018$c55) * 100)
+
+smoking.2018$regular[is.na(smoking.2018$regular)] = 0
+
+#plot
+hist(smoking.2018$regular)
+
+# join to FENZ data
+data_fenz_impacts_res_smoking <- data_fenz_impacts_res %>% inner_join( smoking.2018, 
+        by = c('SA12018_V1'='sa1'))
+
+
+min_percentage <- c(0,10,20,30,40,50,60,70,80,90)
+max_percentage <- c(10,20,30,40,50,60,70,80,90,100)
+bin <- c("0-10%","10-20%","20-30%","30-40%","40-50%","50-60%","60-70%","70-80%","80-90%","90-100%")
+
+stats <- data.frame(bin)
+
+
+for (i in 1:length(min_percentage)) { 
+    
+  # Regular smokers
+  stats$casualties.regular[i] <-
+    nrow(data_fenz_impacts_res_smoking
+    [data_fenz_impacts_res_smoking$Casualty_Count > 0 &
+    data_fenz_impacts_res_smoking$regular > min_percentage[i] &
+    data_fenz_impacts_res_smoking$regular <= max_percentage[i], ]) /
+    nrow(data_fenz_impacts_res_smoking
+    [data_fenz_impacts_res_smoking$regular > min_percentage[i] &
+    data_fenz_impacts_res_smoking$regular <= max_percentage[i], ]) * 100
+  stats$casualties.regular.n[i] <-
+    nrow(data_fenz_impacts_res_smoking[data_fenz_impacts_res_smoking$Casualty_Count > 0 &
+    data_fenz_impacts_res_smoking$regular > min_percentage[i] &
+    data_fenz_impacts_res_smoking$regular <= max_percentage[i], ])
+}
+
+#Plots
+library(ggplot2)
+library(ggrepel)
+
+# Regular smokers / casualties
+ggplot(stats, aes(bin,casualties.regular)) +
+  geom_point(na.rm = TRUE) +
+  geom_text_repel(na.rm = TRUE, aes(label = casualties.regular.n), size=3) +
+  xlab("% of regular smokers in SA1") + ylab("% of events with casualties") +
+  geom_hline(yintercept=percentage_events_casualties, linetype="dashed", color = "red")
+
+
+
+
+
+
+```
+
+Analysis 4 - No difficulty walking
+```{r}
+#72	2018	difficulty walking or climbing steps aged 5 years and over	No difficulty
+#73	2018	difficulty walking or climbing steps aged 5 years and over	Some difficulty
+#74	2018	difficulty walking or climbing steps aged 5 years and over	A lot of difficulty
+#75	2018	difficulty walking or climbing steps aged 5 years and over	Cannot do at all
+#76	2018	difficulty walking or climbing steps aged 5 years and over	Total stated
+#77	2018	difficulty walking or climbing steps aged 5 years and over	Not elsewhere included
+#78	2018	difficulty walking or climbing steps aged 5 years and over	Total
+
+# calculate percentages
+walking.2018 <- census_individual_part2[c('sa1','c72','c76')]
+walking.2018$noDifficulty <- as.integer((walking.2018$c72/walking.2018$c76) * 100)
+
+walking.2018$regular[is.na(walking.2018$noDifficulty)] = 0
+
+
+#plot
+hist(walking.2018$noDifficulty)
+
+# join to FENZ data
+data_fenz_impacts_res_walking <- data_fenz_impacts_res %>% inner_join( walking.2018, 
+        by = c('SA12018_V1'='sa1'))
+
+
+min_percentage <- c(0,10,20,30,40,50,60,70,80,90)
+max_percentage <- c(10,20,30,40,50,60,70,80,90,100)
+bin <- c("0-10%","10-20%","20-30%","30-40%","40-50%","50-60%","60-70%","70-80%","80-90%","90-100%")
+
+stats <- data.frame(bin)
+
+
+for (i in 1:length(min_percentage)) { 
+    
+  # Regular smokers
+  stats$casualties.noDifficulty[i] <-
+    nrow(data_fenz_impacts_res_walking
+    [data_fenz_impacts_res_walking$Casualty_Count > 0 &
+    data_fenz_impacts_res_walking$noDifficulty > min_percentage[i] &
+    data_fenz_impacts_res_walking$noDifficulty <= max_percentage[i], ]) /
+    nrow(data_fenz_impacts_res_walking
+    [data_fenz_impacts_res_walking$noDifficulty > min_percentage[i] &
+    data_fenz_impacts_res_walking$noDifficulty <= max_percentage[i], ]) * 100
+  stats$casualties.noDifficulty.n[i] <-
+    nrow(data_fenz_impacts_res_walking[data_fenz_impacts_res_walking$Casualty_Count > 0 &
+    data_fenz_impacts_res_walking$noDifficulty > min_percentage[i] &
+    data_fenz_impacts_res_walking$noDifficulty <= max_percentage[i], ])
+}
+
+#Plots
+library(ggplot2)
+library(ggrepel)
+
+# Regular smokers / casualties
+ggplot(stats, aes(bin,casualties.noDifficulty)) +
+  geom_point(na.rm = TRUE) +
+  geom_text_repel(na.rm = TRUE, aes(label = casualties.noDifficulty.n), size=3) +
+  xlab("% of people with no difficulty walking in SA1") + ylab("% of events with casualties") +
+  geom_hline(yintercept=percentage_events_casualties, linetype="dashed", color = "red")
+
+
+```
+
+
+Read building data
+```{r}
+
+buildings_fenz <- read.csv("../FENZ with building data/FENZIncidentsBuildings.csv")
+buildings_gns <- read.csv("Buildings/Buildings_AllNZ_AllColumns.csv")
+
+```
+
+```{r}
+
+library(ggplot2)
+
+ggplot(buildings_fenz, aes(Use_Category)) +
+  geom_bar() +
+  coord_flip()
+
+```
+
+New analysis - use case = residential dwelling
+```{r}
+
+buildings_fenz_res <- subset(buildings_fenz, Use_Category == 'Residential Dwelling')
+buildings_gns_res <- subset(buildings_gns, Use_Category == 'Residential Dwelling')
+
+# remove full datasets just to improve memory
+rm(buildings_fenz)
+rm(gns_res)
+
+buildings_fenz_res_casulties <- subset(buildings_fenz_res, Casualty_Count > 0)
+buildings_fenz_res_fatalities <- subset(buildings_fenz_res, Fatality_Count > 0)
+
+ggplot(buildings_fenz_res, aes(Construction_Type_1)) +
+  geom_bar() +
+  coord_flip()
+
+ggplot(buildings_fenz_res_casulties,aes(x=Casualty_Count, y=Neighbour_dist)) + geom_point()
+
+
+
+```
+
+Create frequency tables
+```{r}
+
+#install.packages('epiDisplay')
+library(epiDisplay)
+library(crosstable)
+
+# Construction type
+const1 <- tab1(buildings_gns_res$Construction_Type, sort.group = "decreasing", cum.percent = TRUE)
+const2 <- tab1(buildings_fenz_res$Construction_Type_1, sort.group = "decreasing", cum.percent = TRUE)
+const3 <- tab1(buildings_fenz_res_casulties$Construction_Type_1, sort.group = "decreasing", cum.percent = TRUE)
+const4 <- tab1(buildings_fenz_res_fatalities$Construction_Type_1, sort.group = "decreasing", cum.percent = TRUE)
+
+# Age (decades)
+age1 <- tab1(buildings_gns_res$Age, sort.group = "decreasing", cum.percent = TRUE)
+age2 <- tab1(buildings_fenz_res$Age, sort.group = "decreasing", cum.percent = TRUE)
+age3 <- tab1(buildings_fenz_res_casulties$Age, sort.group = "decreasing", cum.percent = TRUE)
+age4 <- tab1(buildings_fenz_res_fatalities$Age, sort.group = "decreasing", cum.percent = TRUE)
+
+
+write.table(const1,"const1.csv",sep=",")
+write.table(const2,"const2.csv",sep=",")
+write.table(const3,"const3.csv",sep=",")
+write.table(const4,"const4.csv",sep=",")
+
+write.table(age1,"age1.csv",sep=",")
+write.table(age2,"age2.csv",sep=",")
+write.table(age3,"age3.csv",sep=",")
+write.table(age4,"age4.csv",sep=",")
+
+```
+
+Look at distance to neighbour
+```{r}
+
+plot(buildings_res_fenz, aes(Casualty_Count,Neighbour_dist))
+
+```
+
+Look at dates built vs date of event - how many buildings re-built following fire...
+```{r}
+library(tidyverse)
+library(lubridate)
+
+# FENZ dataset = 60409 variables
+#1. pull out year from incident date
+buildings_fenz_res_fatalities$incident_year <- as.POSIXct(buildings_fenz_res_fatalities$Date_Time, format = "%d/%m/%Y %H:%M:%S")
+buildings_fenz_res_fatalities$incident_year <- as.integer(format(buildings_fenz_res_fatalities$incident_year, format="%Y"))
+#2. calculate difference between event and build year - 0 = same year, +ve = newer, -ve = older
+buildings_fenz_res_fatalities$year_diff <- buildings_fenz_res_fatalities$Age - buildings_fenz_res_fatalities$incident_year 
+#3. plot
+hist(buildings_fenz_res_fatalities$year_diff)
+#4.
+sum(buildings_fenz_res_fatalities$year_diff >0 , na.rm=TRUE) 
+sum(buildings_fenz_res_fatalities$year_diff >=0 , na.rm=TRUE)
+sum(buildings_fenz_res_fatalities$year_diff >0 , na.rm=TRUE) / 213
+sum(buildings_fenz_res_fatalities$year_diff >=0 , na.rm=TRUE) / 213
+
+
+
+
+
+```
+

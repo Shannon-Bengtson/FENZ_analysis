@@ -1,0 +1,1092 @@
+---
+title: "Analysis"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+
+Read building data
+```{r}
+
+buildings_fenz <- read.csv("../FENZ with building data/FENZIncidentsBuildings_new_MeshblockIDs_NZDep.csv")  # FENZ + GNS
+#buildings_gns <- read.csv("Buildings/Buildings_AllNZ_AllColumns.csv") # Entire GNS
+
+```
+
+Plot building category
+```{r}
+
+library(ggplot2)
+
+ggplot(buildings_fenz, aes(Use_Category)) +
+  geom_bar() +
+  coord_flip()
+
+```
+
+Consider correlations for residential buildings
+```{r}
+
+buildings_fenz_res <- subset(buildings_fenz, Use_Category == 'Residential Dwelling')
+#buildings_fenz_res_casualties <- subset(buildings_fenz_res, Casualty_Count > 0)
+#buildings_fenz_res_fatalities <- subset(buildings_fenz_res, Fatality_Count > 0)
+
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(OID_,Incident_ID,Exposure_ID))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Incident_Type))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(MapgridE__X_,MapgridN__Y_))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Suburb,Street,Street_Type,Address_No_,TLA))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(General_Property_Use_Group))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(General_Property_Use))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Specific_Property_Use_Group_Parent))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Specific_Property_Use_Group))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Specific_Property_Use))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Year_Constructed))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Construction_Type))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Fire_Cause_Group))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Fire_Cause))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Heat_Source_Group))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Heat_Source))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Origin_Group))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Location_of_Origin))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Age_of_Person_Involved))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Ethnicity))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Flame_Damage))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Percent_of_Property_Saved_Name))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(building_id,Outline_id,Point_id))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(x_coord,y_coord))
+
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(UseCat_code))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(ConType_code))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Roof_code))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Wall_code))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(RoofPitch_code))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Parapet_code))
+buildings_fenz_res = subset(buildings_fenz_res, select = -c(Assign_code))
+
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Use_Category"] = "GNS_Use_Category"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Construction_Type_1"] ="GNS_Construction_Type_1"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Age"] ="GNS_Age"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Storeys"] ="GNS_Storeys"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Floor_Area"] ="GNS_Floor_Area"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Site_Cover"] ="GNS_Site_Cover"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Roof_Const"] ="GNS_Roof_Const"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Wall_Const"] ="GNS_Wall_Const"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Floor_Height"] ="GNS_Floor_Hgt"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Roof_Pitch"] ="GNS_Roof_Pitch"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Parapet"] ="GNS_Parapet"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Rep_Cost"] ="GNS_Rep_Cost"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Rep_Cost_multi"] ="GNS_Rep_Cost_multi"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Units"] ="GNS_Num_Units"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Res_Units"] ="GNS_Res_Units"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "NonRes_Units"] ="GNS_NonRes_Units"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Assign_type"] ="GNS_Assign_type"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Building_dist"] ="GNS_Building_dist"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Neighbour_dist"] ="GNS_Neighb_Dist"
+
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Percent_of_Property_Saved"] ="Percent_Saved"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Flame_Damage__m2_"] ="Damage_m2"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "First_arrival_minutes"] ="1st_Arrival_Mins"
+colnames(buildings_fenz_res)[colnames(buildings_fenz_res) == "Second_arrival_minutes"] ="2nd_Arrival_Mins"
+
+
+head(buildings_fenz_res, 5)
+# remove info not needed
+
+```
+
+Perform correlation 
+See https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/
+```{r}
+
+library(corrplot)
+
+# Subset to numerical data only (for correlation analysis)
+num_cols <- unlist(lapply(buildings_fenz_res, is.numeric))          # Identify numeric columns
+buildings_fenz_res_num <- buildings_fenz_res[ , num_cols]           # Subset numeric columns of data
+
+## correlation for all variables
+#round(cor(buildings_fenz_res_num),
+#  digits = 2 # rounded to 2 decimals
+#)
+
+# futher simplify data
+buildings_fenz_res_num$Critical_Injury_Count <- buildings_fenz_res_num$Critical_Injury_Count + buildings_fenz_res_num$Serious_Injury_Count + buildings_fenz_res_num$Moderate_Injury_Count + buildings_fenz_res_num$Minor_Injury_Count + buildings_fenz_res_num$Unclassified_Injury_Count
+
+buildings_fenz_res_num = subset(buildings_fenz_res_num, select = -c(Serious_Injury_Count,Moderate_Injury_Count,Minor_Injury_Count,Unclassified_Injury_Count))
+
+colnames(buildings_fenz_res_num)[colnames(buildings_fenz_res_num) == "Critical_Injury_Count"] ="Injury_Count"
+buildings_fenz_res_num = subset(buildings_fenz_res_num, select = -c(Floor_Area__m2_,Numfloors,Structure_Area__m2_))
+buildings_fenz_res_num = subset(buildings_fenz_res_num, select = -c(GNS_NonRes_Units,GNS_Rep_Cost_multi,GNS_Res_Units,GNS_Building_dist))
+
+# change order of dataframe
+buildings_fenz_res_num <- buildings_fenz_res_num[,c(1,2,3,4,5,14,15,6,7,8,9,10,11,12,13,16,17)]
+
+
+## improved correlation matrix
+#library(corrplot)
+
+#corrplot(cor(buildings_fenz_res_num),
+#  method = "number",
+#  type = "upper" # show only upper side
+#)
+
+#corrplot(cor(buildings_fenz_res_num),
+#  type = "upper"
+#  #order = "AOE"
+#)
+
+#Subset to events with casualties
+buildings_fenz_res_num_casualties <- subset(buildings_fenz_res_num, Casualty_Count > 0)
+buildings_fenz_res_cor1 = subset(buildings_fenz_res_num_casualties, select = -c(MB2020_V2_))                    # remove meshblock code before correlation
+
+#corrplot(cor(buildings_fenz_res_num_casualties),
+#  type = "upper"
+#  #order = "AOE"
+#)
+
+#include significance 
+# mat : is a matrix of data
+# ... : further arguments to pass to the native R cor.test function
+cor.mtest <- function(mat, ...) {
+    mat <- as.matrix(mat)
+    n <- ncol(mat)
+    p.mat<- matrix(NA, n, n)
+    diag(p.mat) <- 0
+    for (i in 1:(n - 1)) {
+        for (j in (i + 1):n) {
+            tmp <- cor.test(mat[, i], mat[, j], ...)
+            p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+        }
+    }
+  colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+  p.mat
+}
+# matrix of the p-value of the correlation
+p.mat <- cor.mtest(buildings_fenz_res_cor1)
+#head(p.mat[, 1:5])
+
+
+corrplot(cor(buildings_fenz_res_cor1),
+  p.mat = p.mat,
+  sig.level = 0.1,
+  type = "upper",
+  addCoef.col = "black",
+  method = "color",
+  tl.srt = 75,
+  #tl.col = 'black',
+  tl.cex = 0.7,
+  diag = FALSE,
+  insig = "blank",
+  number.cex = 0.7,
+)
+
+
+```
+Have a closer look at building age
+```{r}
+
+#min(buildings_fenz_res$GNS_Age)
+#max(buildings_fenz_res$GNS_Age)
+
+vul1 <- sum(buildings_fenz_res$GNS_Age < 1920)  
+vul2 <- sum(buildings_fenz_res$GNS_Age >= 1920 & buildings_fenz_res$GNS_Age < 1950)
+vul3 <- sum(buildings_fenz_res$GNS_Age >= 1950 & buildings_fenz_res$GNS_Age < 1980)
+vul4 <- sum(buildings_fenz_res$GNS_Age >= 1980 & buildings_fenz_res$GNS_Age < 2000)
+vul5 <- sum(buildings_fenz_res$GNS_Age >= 2000)
+
+vul1+vul2+vul3+vul4+vul5
+
+```
+
+
+
+Import census data and Join SA1 values
+```{r}
+
+census_dwellings <- read.csv("Census/2018-SA1-dataset-dwellings-total-NZ_Formatted.csv")
+census_dwellings_header <- read.csv("Census/Headers_dwellings.csv")
+
+mb_sa1 <- read.csv("2018CensusMeshblock_and_correspondingSA1_IDs.csv")
+
+census_individual_part2 <- read.csv("Census/2018-SA1-dataset-individual-part-2-total-NZ_Formatted_Totals.csv")
+
+# Add SA1 info
+library(dplyr)
+buildings_fenz_res_num_census <- buildings_fenz_res_num %>% inner_join(mb_sa1, 
+        by = c('MB2020_V2_'='MB2018_V1_'))
+
+```
+
+Consider dwelling types
+```{r}
+
+# 11	2018	occupied private dwelling type	Separate house
+# 12	2018	occupied private dwelling type	Joined dwelling
+# 13	2018	occupied private dwelling type	Other private dwelling
+# 14	2018	occupied private dwelling type	Private dwelling not further defined
+# 15	2018	occupied private dwelling type	Total
+
+#c51	2018	number of roomsfor occupied private dwellings 	One room
+#c52	2018	number of roomsfor occupied private dwellings 	Two rooms
+#c53	2018	number of roomsfor occupied private dwellings 	Three rooms
+#c54	2018	number of roomsfor occupied private dwellings 	Four rooms
+#c55	2018	number of roomsfor occupied private dwellings 	Five rooms
+#c56	2018	number of roomsfor occupied private dwellings 	Six rooms
+#c57	2018	number of roomsfor occupied private dwellings 	Seven rooms
+#c58	2018	number of roomsfor occupied private dwellings 	Eight or more rooms
+#c59	2018	number of roomsfor occupied private dwellings 	Total stated
+
+#c78	2018	number of bedrooms for occupied private dwellings	One bedroom
+#c79	2018	number of bedrooms for occupied private dwellings	Two bedrooms
+#c80	2018	number of bedrooms for occupied private dwellings	Three bedrooms
+#c81	2018	number of bedrooms for occupied private dwellings	Four bedrooms
+#c82	2018	number of bedrooms for occupied private dwellings	Five or more bedrooms
+#c83	2018	number of bedrooms for occupied private dwellings	Total stated
+
+#c143	2018	dwelling occupancy status for all dwellings 	Occupied dwelling
+#c144	2018	dwelling occupancy status for all dwellings 	Unoccupied dwelling – residents away
+#c145	2018	dwelling occupancy status for all dwellings 	Unoccupied dwelling – empty dwelling
+#c147	2018	dwelling occupancy status for all dwellings 	Dwelling under construction
+#c148	2018	dwelling occupancy status for all dwellings 	Total dwellings
+
+library(corrplot)
+
+# calculate percentages
+dwellingType.2018 <- census_dwellings[c('SA1','c11','c12','c13','c14','c15','c51','c52','c53','c54','c55','c56','c57','c58','c59','c78','c79','c80','c81','c82','c83','c143','c144','c145','c147','c148')]
+
+dwellingType.2018$separateHouse <- as.integer((dwellingType.2018$c11/dwellingType.2018$c15) * 100)
+dwellingType.2018$joinedDwelling <- as.integer((dwellingType.2018$c12/dwellingType.2018$c15) * 100)
+dwellingType.2018$other <- as.integer((dwellingType.2018$c13/dwellingType.2018$c15) * 100)
+dwellingType.2018$notDefined <- as.integer((dwellingType.2018$c14/dwellingType.2018$c15) * 100)
+
+dwellingType.2018$Rooms.1 <- as.integer((dwellingType.2018$c51/dwellingType.2018$c59) * 100)
+dwellingType.2018$Rooms.2 <- as.integer((dwellingType.2018$c52/dwellingType.2018$c59) * 100)
+dwellingType.2018$Rooms.3 <- as.integer((dwellingType.2018$c53/dwellingType.2018$c59) * 100)
+dwellingType.2018$Rooms.4 <- as.integer((dwellingType.2018$c54/dwellingType.2018$c59) * 100)
+dwellingType.2018$Rooms.5 <- as.integer((dwellingType.2018$c55/dwellingType.2018$c59) * 100)
+dwellingType.2018$Rooms.6 <- as.integer((dwellingType.2018$c56/dwellingType.2018$c59) * 100)
+dwellingType.2018$Rooms.7 <- as.integer((dwellingType.2018$c57/dwellingType.2018$c59) * 100)
+dwellingType.2018$Rooms.8P <- as.integer((dwellingType.2018$c58/dwellingType.2018$c59) * 100)
+
+dwellingType.2018$Beds.1 <- as.integer((dwellingType.2018$c78/dwellingType.2018$c83) * 100)
+dwellingType.2018$Beds.2 <- as.integer((dwellingType.2018$c79/dwellingType.2018$c83) * 100)
+dwellingType.2018$Beds.3 <- as.integer((dwellingType.2018$c80/dwellingType.2018$c83) * 100)
+dwellingType.2018$Beds.4 <- as.integer((dwellingType.2018$c81/dwellingType.2018$c83) * 100)
+dwellingType.2018$Beds.5P <- as.integer((dwellingType.2018$c82/dwellingType.2018$c83) * 100)
+
+dwellingType.2018$occupied <- as.integer((dwellingType.2018$c143/dwellingType.2018$c148) * 100)
+dwellingType.2018$ResAway <- as.integer((dwellingType.2018$c144/dwellingType.2018$c148) * 100)
+dwellingType.2018$Empty <- as.integer((dwellingType.2018$c145/dwellingType.2018$c148) * 100)
+dwellingType.2018$UnderConst <- as.integer((dwellingType.2018$c147/dwellingType.2018$c148) * 100)
+
+dwellingType.2018$separateHouse[is.na(dwellingType.2018$separateHouse)] = 0
+dwellingType.2018$joinedDwelling[is.na(dwellingType.2018$joinedDwelling)] = 0
+dwellingType.2018$other[is.na(dwellingType.2018$other)] = 0
+dwellingType.2018$notDefined[is.na(dwellingType.2018$notDefined)] = 0
+
+dwellingType.2018$Rooms.1[is.na(dwellingType.2018$Rooms.1)] = 0
+dwellingType.2018$Rooms.2[is.na(dwellingType.2018$Rooms.2)] = 0
+dwellingType.2018$Rooms.3[is.na(dwellingType.2018$Rooms.3)] = 0
+dwellingType.2018$Rooms.4[is.na(dwellingType.2018$Rooms.4)] = 0
+dwellingType.2018$Rooms.5[is.na(dwellingType.2018$Rooms.5)] = 0
+dwellingType.2018$Rooms.6[is.na(dwellingType.2018$Rooms.6)] = 0
+dwellingType.2018$Rooms.7[is.na(dwellingType.2018$Rooms.7)] = 0
+dwellingType.2018$Rooms.8P[is.na(dwellingType.2018$Rooms.8P)] = 0
+
+dwellingType.2018$Beds.1[is.na(dwellingType.2018$Beds.1)] = 0
+dwellingType.2018$Beds.2[is.na(dwellingType.2018$Beds.2)] = 0
+dwellingType.2018$Beds.3[is.na(dwellingType.2018$Beds.3)] = 0
+dwellingType.2018$Beds.4[is.na(dwellingType.2018$Beds.4)] = 0
+dwellingType.2018$Beds.5P[is.na(dwellingType.2018$Beds.5P)] = 0
+
+dwellingType.2018$occupied[is.na(dwellingType.2018$occupied)] = 0
+dwellingType.2018$ResAway[is.na(dwellingType.2018$ResAway)] = 0
+dwellingType.2018$Empty[is.na(dwellingType.2018$Empty)] = 0
+dwellingType.2018$UnderConst[is.na(dwellingType.2018$UnderConst)] = 0
+
+##plot
+#hist(dwellingType.2018$separateHouse)
+#hist(dwellingType.2018$joinedDwelling)
+#hist(dwellingType.2018$other)
+#hist(dwellingType.2018$notDefined)
+
+# join to FENZ data
+buildings_fenz_res_num_census <- buildings_fenz_res_num_census %>% inner_join(dwellingType.2018, 
+        by = c('SA12018_V1'='SA1'))
+
+buildings_fenz_res_num_census = subset(buildings_fenz_res_num_census, select = -c(c11,c12,c13,c14,c15,other,notDefined,c51,c52,c53,c54,c55,c56,c57,c58,c59,c78,c79,c80,c81,c82,c83,c143,c144,c145,c147,c148))
+
+data_type = subset(buildings_fenz_res_num_census, select = c(Percent_Saved,Damage_m2,Casualty_Count,Fatality_Count,Injury_Count,separateHouse,joinedDwelling,occupied,ResAway,Empty,UnderConst,Rooms.1,Rooms.2,Rooms.3,Rooms.4,Rooms.5,Rooms.6,Rooms.7,Rooms.8P,Beds.1,Beds.2,Beds.3,Beds.4,Beds.5P))
+
+
+#include significance 
+# mat : is a matrix of data
+# ... : further arguments to pass to the native R cor.test function
+cor.mtest <- function(mat, ...) {
+    mat <- as.matrix(mat)
+    n <- ncol(mat)
+    p.mat<- matrix(NA, n, n)
+    diag(p.mat) <- 0
+    for (i in 1:(n - 1)) {
+        for (j in (i + 1):n) {
+            tmp <- cor.test(mat[, i], mat[, j], ...)
+            p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+        }
+    }
+  colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+  p.mat
+}
+# matrix of the p-value of the correlation
+p.mat <- cor.mtest(data_type)
+#head(p.mat[, 1:5])
+
+
+corrplot(cor(data_type),
+  p.mat = p.mat,
+  sig.level = 0.1,
+  type = "upper",
+  addCoef.col = "black",
+  method = "color",
+  tl.srt = 75,
+  #tl.col = 'black',
+  tl.cex = 0.7,
+  diag = FALSE,
+  insig = "blank",
+  number.cex = 0.7,
+)
+
+```
+
+Main heating type / fuel / damp / mould
+```{r}
+#c86	2018	main types of heating used to heat dwellings for occupied private dwellings  	No heating used
+#c87	2018	main types of heating used to heat dwellings for occupied private dwellings  	Heat pump
+#c88	2018	main types of heating used to heat dwellings for occupied private dwellings  	Electric heater
+#c89	2018	main types of heating used to heat dwellings for occupied private dwellings  	Fixed gas heater
+#c90	2018	main types of heating used to heat dwellings for occupied private dwellings  	Portable gas heater
+#c91	2018	main types of heating used to heat dwellings for occupied private dwellings  	Wood burner
+#c92	2018	main types of heating used to heat dwellings for occupied private dwellings  	Pellet fire
+#c93	2018	main types of heating used to heat dwellings for occupied private dwellings  	Coal burner
+#c94	2018	main types of heating used to heat dwellings for occupied private dwellings  	Other types of heating
+#c95	2018	main types of heating used to heat dwellings for occupied private dwellings  	Total stated
+#c96	2018	main types of heating used to heat dwellings for occupied private dwellings  	Not elsewhere included
+#c97	2018	main types of heating used to heat dwellings for occupied private dwellings  	Total
+
+#c120	2018	fuel types used to heat dwellings for occupied private dwellings 	Electricity
+#c121	2018	fuel types used to heat dwellings for occupied private dwellings 	Gas
+#c122	2018	fuel types used to heat dwellings for occupied private dwellings 	Wood
+#c123	2018	fuel types used to heat dwellings for occupied private dwellings 	Coal
+#c124	2018	fuel types used to heat dwellings for occupied private dwellings 	Home heating oil
+#c125	2018	fuel types used to heat dwellings for occupied private dwellings 	Solar power
+#c126	2018	fuel types used to heat dwellings for occupied private dwellings 	No fuels used
+#c127	2018	fuel types used to heat dwellings for occupied private dwellings 	Other fuel(s) 
+#c128	2018	fuel types used to heat dwellings for occupied private dwellings 	Total stated
+
+#c160	2018	dwelling dampness indicator for occupied private dwellings 	 Always damp
+#c161	2018	dwelling dampness indicator for occupied private dwellings 	Sometimes damp
+#c162	2018	dwelling dampness indicator for occupied private dwellings 	 Total damp
+#c163	2018	dwelling dampness indicator for occupied private dwellings 	 Not damp
+#c164	2018	dwelling dampness indicator for occupied private dwellings 	Total stated
+
+#c167	2018	dwelling mould indicator for occupied private dwellings 	Mould over A4 size  always
+#c168	2018	dwelling mould indicator for occupied private dwellings 	Mould over A4 size  sometimes
+#c169	2018	dwelling mould indicator for occupied private dwellings 	Total mould
+#c170	2018	dwelling mould indicator for occupied private dwellings 	No mould / smaller than A4 size
+#c171	2018	dwelling mould indicator for occupied private dwellings 	Total stated
+
+# calculate percentages
+heatingType.2018 <- census_dwellings[c('SA1','c86','c87','c88','c89','c90','c91','c92','c93','c94','c95','c96','c97','c120','c121','c122','c123','c124','c125','c126','c127','c128','c160','c161','c163','c164','c167','c168','c170','c171')]
+
+heatingType.2018$noHeating <- as.integer((heatingType.2018$c86/heatingType.2018$c97) * 100)
+heatingType.2018$heatPump <- as.integer((heatingType.2018$c87/heatingType.2018$c97) * 100)
+heatingType.2018$electricHeater <- as.integer((heatingType.2018$c88/heatingType.2018$c97) * 100)
+heatingType.2018$fixedGasHeater <- as.integer((heatingType.2018$c89/heatingType.2018$c97) * 100)
+heatingType.2018$portableGasHeater <- as.integer((heatingType.2018$c90/heatingType.2018$c97) * 100)
+heatingType.2018$woodBurner <- as.integer((heatingType.2018$c91/heatingType.2018$c97) * 100)
+heatingType.2018$pelletFire <- as.integer((heatingType.2018$c92/heatingType.2018$c97) * 100)
+heatingType.2018$coalBurner <- as.integer((heatingType.2018$c93/heatingType.2018$c97) * 100)
+heatingType.2018$otherHeat <- as.integer((heatingType.2018$c94/heatingType.2018$c97) * 100)
+
+heatingType.2018$fuel.electricity <- as.integer((heatingType.2018$c120/heatingType.2018$c128) * 100)
+heatingType.2018$fuel.gas <- as.integer((heatingType.2018$c121/heatingType.2018$c128) * 100)
+heatingType.2018$fuel.wood <- as.integer((heatingType.2018$c122/heatingType.2018$c128) * 100)
+heatingType.2018$fuel.coal <- as.integer((heatingType.2018$c123/heatingType.2018$c128) * 100)
+heatingType.2018$fuel.heatingOil <- as.integer((heatingType.2018$c124/heatingType.2018$c128) * 100)
+heatingType.2018$fuel.solar <- as.integer((heatingType.2018$c125/heatingType.2018$c128) * 100)
+heatingType.2018$fuel.no <- as.integer((heatingType.2018$c126/heatingType.2018$c128) * 100)
+heatingType.2018$fuel.other <- as.integer((heatingType.2018$c127/heatingType.2018$c128) * 100)
+
+heatingType.2018$damp.always <- as.integer((heatingType.2018$c160/heatingType.2018$c164) * 100)
+heatingType.2018$damp.sometimes <- as.integer((heatingType.2018$c161/heatingType.2018$c164) * 100)
+heatingType.2018$damp.no <- as.integer((heatingType.2018$c163/heatingType.2018$c164) * 100)
+
+heatingType.2018$mould.A4always <- as.integer((heatingType.2018$c167/heatingType.2018$c171) * 100)
+heatingType.2018$mould.A4sometimes <- as.integer((heatingType.2018$c168/heatingType.2018$c171) * 100)
+heatingType.2018$mould.underA4 <- as.integer((heatingType.2018$c170/heatingType.2018$c171) * 100)
+
+heatingType.2018$noHeating[is.na(heatingType.2018$noHeating)] = 0
+heatingType.2018$heatPump[is.na(heatingType.2018$heatPump)] = 0
+heatingType.2018$electricHeater[is.na(heatingType.2018$electricHeater)] = 0
+heatingType.2018$fixedGasHeater[is.na(heatingType.2018$fixedGasHeater)] = 0
+heatingType.2018$portableGasHeater[is.na(heatingType.2018$portableGasHeater)] = 0
+heatingType.2018$woodBurner[is.na(heatingType.2018$woodBurner)] = 0
+heatingType.2018$pelletFire[is.na(heatingType.2018$pelletFire)] = 0
+heatingType.2018$coalBurner[is.na(heatingType.2018$coalBurner)] = 0
+heatingType.2018$otherHeat[is.na(heatingType.2018$otherHeat)] = 0
+
+heatingType.2018$fuel.electricity[is.na(heatingType.2018$fuel.electricity)] = 0
+heatingType.2018$fuel.gas[is.na(heatingType.2018$fuel.gas)] = 0
+heatingType.2018$fuel.wood[is.na(heatingType.2018$fuel.wood)] = 0
+heatingType.2018$fuel.coal[is.na(heatingType.2018$fuel.coal)] = 0
+heatingType.2018$fuel.heatingOil[is.na(heatingType.2018$fuel.heatingOil)] = 0
+heatingType.2018$fuel.solar[is.na(heatingType.2018$fuel.solar)] = 0
+heatingType.2018$fuel.no[is.na(heatingType.2018$fuel.no)] = 0
+heatingType.2018$fuel.other[is.na(heatingType.2018$fuel.other)] = 0
+
+heatingType.2018$damp.always[is.na(heatingType.2018$damp.always)] = 0
+heatingType.2018$damp.sometimes[is.na(heatingType.2018$damp.sometimes)] = 0
+heatingType.2018$damp.no[is.na(heatingType.2018$damp.no)] = 0
+heatingType.2018$mould.A4always[is.na(heatingType.2018$mould.A4always)] = 0
+heatingType.2018$mould.A4sometimes[is.na(heatingType.2018$mould.A4sometimes)] = 0
+heatingType.2018$mould.underA4[is.na(heatingType.2018$mould.underA4)] = 0
+
+
+##plot
+#hist(heatingType.2018$noHeating)
+#hist(heatingType.2018$heatPump)
+#hist(heatingType.2018$electricHeater)
+#hist(heatingType.2018$fixedGasHeater)
+#hist(heatingType.2018$portableGasHeater)
+#hist(heatingType.2018$woodBurner)
+#hist(heatingType.2018$pelletFire)
+#hist(heatingType.2018$coalBurner)
+#hist(heatingType.2018$other)
+
+# join to FENZ data
+data_fenz_impacts_res_heatingType <- buildings_fenz_res_num_census %>% inner_join(heatingType.2018, 
+        by = c('SA12018_V1'='SA1'))
+
+data_fenz_impacts_res_heatingType = subset(data_fenz_impacts_res_heatingType, select = -c(c86,c87,c88,c89,c90,c91,c92,c93,c94,c95,c96,c97,c120,c121,c122,c123,c124,c125,c126,c127,c128,c160,c161,c163,c164,c167,c168,c170,c171))
+
+data_heating = subset(data_fenz_impacts_res_heatingType, select = c(Percent_Saved,Damage_m2,Casualty_Count,Fatality_Count,Injury_Count,noHeating,heatPump,electricHeater,fixedGasHeater,portableGasHeater,woodBurner,pelletFire,coalBurner,otherHeat,fuel.electricity,fuel.gas,fuel.wood,fuel.coal,fuel.heatingOil,fuel.solar,fuel.no,fuel.other,damp.always,damp.sometimes,damp.no,mould.A4always,mould.A4sometimes,mould.underA4))
+
+
+#include significance 
+# mat : is a matrix of data
+# ... : further arguments to pass to the native R cor.test function
+cor.mtest <- function(mat, ...) {
+    mat <- as.matrix(mat)
+    n <- ncol(mat)
+    p.mat<- matrix(NA, n, n)
+    diag(p.mat) <- 0
+    for (i in 1:(n - 1)) {
+        for (j in (i + 1):n) {
+            tmp <- cor.test(mat[, i], mat[, j], ...)
+            p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+        }
+    }
+  colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+  p.mat
+}
+# matrix of the p-value of the correlation
+p.mat <- cor.mtest(data_heating)
+#head(p.mat[, 1:5])
+
+
+corrplot(cor(data_heating),
+  p.mat = p.mat,
+  sig.level = 0.1,
+  type = "upper",
+  addCoef.col = "black",
+  method = "color",
+  tl.srt = 75,
+  #tl.col = 'black',
+  tl.cex = 0.7,
+  diag = FALSE,
+  insig = "blank",
+  number.cex = 0.7,
+)
+
+
+```
+
+Smoking / Relationships / home ownership / children
+```{r}
+
+#52	2018	cigarette smoking behaviour aged 15 years and over	Regular smoker
+#53	2018	cigarette smoking behaviour aged 15 years and over	Ex-smoker
+#54	2018	cigarette smoking behaviour aged 15 years and over	Never smoked regularly
+#55	2018	cigarette smoking behaviour aged 15 years and over	Total stated
+#56	2018	cigarette smoking behaviour aged 15 years and over	Not elsewhere included
+#57	2018	cigarette smoking behaviour aged 15 years and over	Total
+
+#128	2018	partnership status current relationship aged 15 years and over	Partnered
+#129	2018	partnership status current relationship aged 15 years and over	Non-partnered
+#130	2018	partnership status current relationship aged 15 years and over	Total stated
+
+#145	2018	individual home ownership aged 15 years and over	Hold in a family trust
+#146	2018	individual home ownership aged 15 years and over	Own or partly own
+#147	2018	individual home ownership aged 15 years and over	Do not own do not hold in a family trust
+#148	2018	individual home ownership aged 15 years and over	Total stated
+
+#173	2018	number of children born for female aged 15 years and over	No children
+#174	2018	number of children born for female aged 15 years and over	One child
+#175	2018	number of children born for female aged 15 years and over	Two children
+#176	2018	number of children born for female aged 15 years and over	Three children
+#177	2018	number of children born for female aged 15 years and over	Four children
+#178	2018	number of children born for female aged 15 years and over	Five children
+#179	2018	number of children born for female aged 15 years and over	Six or more children
+#180	2018	number of children born for female aged 15 years and over	Object to answering
+#181	2018	number of children born for female aged 15 years and over	Total stated
+
+
+
+# calculate percentages
+smoking.2018 <- census_individual_part2[c('sa1','c52','c53','c54','c55','c128','c129','c130','c145','c146','c147','c148','c173','c174','c175','c176','c177','c178','c179','c181')]
+
+smoking.2018$smoking.regular <- as.integer((smoking.2018$c52/smoking.2018$c55) * 100)
+smoking.2018$smoking.ex <- as.integer((smoking.2018$c53/smoking.2018$c55) * 100)
+smoking.2018$smoking.never <- as.integer((smoking.2018$c54/smoking.2018$c55) * 100)
+
+smoking.2018$partnered <- as.integer((smoking.2018$c128/smoking.2018$c130) * 100)
+smoking.2018$nonPartnered <- as.integer((smoking.2018$c129/smoking.2018$c130) * 100)
+
+smoking.2018$homeOwn.trust <- as.integer((smoking.2018$c145/smoking.2018$c148) * 100)
+smoking.2018$homeOwn.own <- as.integer((smoking.2018$c146/smoking.2018$c148) * 100)
+smoking.2018$homeOwn.no <- as.integer((smoking.2018$c147/smoking.2018$c148) * 100)
+
+smoking.2018$children.0 <- as.integer((smoking.2018$c173/smoking.2018$c181) * 100)
+smoking.2018$children.1 <- as.integer((smoking.2018$c174/smoking.2018$c181) * 100)
+smoking.2018$children.2 <- as.integer((smoking.2018$c175/smoking.2018$c181) * 100)
+smoking.2018$children.3 <- as.integer((smoking.2018$c176/smoking.2018$c181) * 100)
+smoking.2018$children.4 <- as.integer((smoking.2018$c177/smoking.2018$c181) * 100)
+smoking.2018$children.5 <- as.integer((smoking.2018$c178/smoking.2018$c181) * 100)
+smoking.2018$children.6P <- as.integer((smoking.2018$c179/smoking.2018$c181) * 100)
+
+smoking.2018$smoking.regular[is.na(smoking.2018$smoking.regular)] = 0
+smoking.2018$smoking.ex[is.na(smoking.2018$smoking.ex)] = 0
+smoking.2018$smoking.never[is.na(smoking.2018$smoking.never)] = 0
+
+smoking.2018$partnered[is.na(smoking.2018$partnered)] = 0
+smoking.2018$nonPartnered[is.na(smoking.2018$nonPartnered)] = 0
+
+smoking.2018$homeOwn.trust[is.na(smoking.2018$homeOwn.trust)] = 0
+smoking.2018$homeOwn.own[is.na(smoking.2018$homeOwn.own)] = 0
+smoking.2018$homeOwn.no[is.na(smoking.2018$homeOwn.no)] = 0
+
+smoking.2018$children.0[is.na(smoking.2018$children.0)] = 0
+smoking.2018$children.1[is.na(smoking.2018$children.1)] = 0
+smoking.2018$children.2[is.na(smoking.2018$children.2)] = 0
+smoking.2018$children.3[is.na(smoking.2018$children.3)] = 0
+smoking.2018$children.4[is.na(smoking.2018$children.4)] = 0
+smoking.2018$children.5[is.na(smoking.2018$children.5)] = 0
+smoking.2018$children.6P[is.na(smoking.2018$children.6P)] = 0
+
+##plot
+#hist(smoking.2018$regular)
+
+# join to FENZ data
+data_fenz_impacts_res_smoking <- buildings_fenz_res_num_census %>% inner_join(smoking.2018, 
+        by = c('SA12018_V1'='sa1'))
+
+data_fenz_impacts_res_smoking = subset(data_fenz_impacts_res_smoking, select = -c(c52,c53,c54,c55,c128,c129,c130,c145,c146,c147,c148,c173,c174,c175,c176,c177,c178,c179,c181))
+
+data_smoking = subset(data_fenz_impacts_res_smoking, select = c(Percent_Saved,Damage_m2,Casualty_Count,Fatality_Count,Injury_Count,smoking.regular,smoking.ex,smoking.never,partnered,nonPartnered,homeOwn.trust,homeOwn.own,homeOwn.no,children.0,children.1,children.2,children.3,children.4,children.5,children.6P))
+
+
+#include significance 
+# mat : is a matrix of data
+# ... : further arguments to pass to the native R cor.test function
+cor.mtest <- function(mat, ...) {
+    mat <- as.matrix(mat)
+    n <- ncol(mat)
+    p.mat<- matrix(NA, n, n)
+    diag(p.mat) <- 0
+    for (i in 1:(n - 1)) {
+        for (j in (i + 1):n) {
+            tmp <- cor.test(mat[, i], mat[, j], ...)
+            p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+        }
+    }
+  colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+  p.mat
+}
+# matrix of the p-value of the correlation
+p.mat <- cor.mtest(data_smoking)
+#head(p.mat[, 1:5])
+
+
+corrplot(cor(data_smoking),
+  p.mat = p.mat,
+  sig.level = 0.1,
+  type = "upper",
+  addCoef.col = "black",
+  method = "color",
+  tl.srt = 75,
+  #tl.col = 'black',
+  tl.cex = 0.7,
+  diag = FALSE,
+  insig = "blank",
+  number.cex = 0.7,
+)
+
+
+
+```
+
+Difficulty walking / Difficulty communicating
+```{r}
+#72	2018	difficulty walking or climbing steps aged 5 years and over	No difficulty
+#73	2018	difficulty walking or climbing steps aged 5 years and over	Some difficulty
+#74	2018	difficulty walking or climbing steps aged 5 years and over	A lot of difficulty
+#75	2018	difficulty walking or climbing steps aged 5 years and over	Cannot do at all
+#76	2018	difficulty walking or climbing steps aged 5 years and over	Total stated
+#77	2018	difficulty walking or climbing steps aged 5 years and over	Not elsewhere included
+#78	2018	difficulty walking or climbing steps aged 5 years and over	Total
+
+#93	2018	difficulty communicating using your usual language	No difficulty
+#94	2018	difficulty communicating using your usual language	Some difficulty
+#95	2018	difficulty communicating using your usual language	A lot of difficulty
+#96	2018	difficulty communicating using your usual language	Cannot do at all
+#97	2018	difficulty communicating using your usual language	Total stated
+
+
+# calculate percentages
+walking.2018 <- census_individual_part2[c('sa1','c72','c73','c74','c75','c76','c93','c94','c95','c96','c97')]
+
+walking.2018$diffWalk.no <- as.integer((walking.2018$c72/walking.2018$c76) * 100)
+walking.2018$diffWalk.some <- as.integer((walking.2018$c73/walking.2018$c76) * 100)
+walking.2018$diffWalk.aLot <- as.integer((walking.2018$c74/walking.2018$c76) * 100)
+walking.2018$diffWalk.cannot <- as.integer((walking.2018$c75/walking.2018$c76) * 100)
+
+walking.2018$diffCom.no <- as.integer((walking.2018$c93/walking.2018$c97) * 100)
+walking.2018$diffCom.some <- as.integer((walking.2018$c94/walking.2018$c97) * 100)
+walking.2018$diffCom.aLot <- as.integer((walking.2018$c95/walking.2018$c97) * 100)
+walking.2018$diffCom.cannot <- as.integer((walking.2018$c96/walking.2018$c97) * 100)
+
+walking.2018$diffWalk.no[is.na(walking.2018$diffWalk.no)] = 0
+walking.2018$diffWalk.some[is.na(walking.2018$diffWalk.some)] = 0
+walking.2018$diffWalk.aLot[is.na(walking.2018$diffWalk.aLot)] = 0
+walking.2018$diffWalk.cannot[is.na(walking.2018$diffWalk.cannot)] = 0
+
+walking.2018$diffCom.no[is.na(walking.2018$diffCom.no)] = 0
+walking.2018$diffCom.some[is.na(walking.2018$diffCom.some)] = 0
+walking.2018$diffCom.aLot[is.na(walking.2018$diffCom.aLot)] = 0
+walking.2018$diffCom.cannot[is.na(walking.2018$diffCom.cannot)] = 0
+
+##plot
+#hist(walking.2018$noDifficulty)
+
+# join to FENZ data
+data_fenz_impacts_res_walking <- buildings_fenz_res_num_census %>% inner_join(walking.2018, 
+        by = c('SA12018_V1'='sa1'))
+
+data_fenz_impacts_res_walking = subset(data_fenz_impacts_res_walking, select = -c(c72,c73,c74,c75,c76,c93,c94,c95,c96,c97))
+
+data_walking = subset(data_fenz_impacts_res_walking, select = c(Percent_Saved,Damage_m2,Casualty_Count,Fatality_Count,Injury_Count,diffWalk.no,diffWalk.some,diffWalk.aLot,diffWalk.cannot,diffCom.no,diffCom.some,diffCom.aLot,diffCom.cannot))
+
+
+#include significance 
+# mat : is a matrix of data
+# ... : further arguments to pass to the native R cor.test function
+cor.mtest <- function(mat, ...) {
+    mat <- as.matrix(mat)
+    n <- ncol(mat)
+    p.mat<- matrix(NA, n, n)
+    diag(p.mat) <- 0
+    for (i in 1:(n - 1)) {
+        for (j in (i + 1):n) {
+            tmp <- cor.test(mat[, i], mat[, j], ...)
+            p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+        }
+    }
+  colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+  p.mat
+}
+# matrix of the p-value of the correlation
+p.mat <- cor.mtest(data_walking)
+#head(p.mat[, 1:5])
+
+
+corrplot(cor(data_walking),
+  p.mat = p.mat,
+  sig.level = 0.1,
+  type = "upper",
+  addCoef.col = "black",
+  method = "color",
+  tl.srt = 75,
+  #tl.col = 'black',
+  tl.cex = 0.7,
+  diag = FALSE,
+  insig = "blank",
+  number.cex = 0.7,
+)
+
+
+```
+
+Qualifications / Study / Income / Benefits
+```{r}
+
+#215	2018	highest qualification aged 15 years and over	Level 1 certificate
+#216	2018	highest qualification aged 15 years and over	Level 2 certificate
+#217	2018	highest qualification aged 15 years and over	Level 3 certificate
+#218	2018	highest qualification aged 15 years and over	Level 4 certificate
+#219	2018	highest qualification aged 15 years and over	Level 5 diploma
+#220	2018	highest qualification aged 15 years and over	Level 6 diploma
+#221	2018	highest qualification aged 15 years and over	Bachelor degree and Level 7 qualification
+#222	2018	highest qualification aged 15 years and over	Post-graduate and honours degrees
+#223	2018	highest qualification aged 15 years and over	Masters degree
+#224	2018	highest qualification aged 15 years and over	Doctorate degree
+#225	2018	highest qualification aged 15 years and over	Overseas secondary school qualification
+#226	2018	highest qualification aged 15 years and over	Total stated
+
+#235	2018	study participation	Full-time study
+#236	2018	study participation	Part-time study
+#237	2018	study participation	Not studying
+#238	2018	study participation	Total stated
+
+#263	2018	total personal income grouped aged 15 years and over	$5,000 or less
+#264	2018	total personal income grouped aged 15 years and over	$5,001 – $10,000
+#265	2018	total personal income grouped aged 15 years and over	$10,001 – $20,000
+#266	2018	total personal income grouped aged 15 years and over	$20,001 – $30,000
+#267	2018	total personal income grouped aged 15 years and over	$30,001 – $50,000
+#268	2018	total personal income grouped aged 15 years and over	$50,001 – $70,000
+#269	2018	total personal income grouped aged 15 years and over	$70,001 or more
+#270	2018	total personal income grouped aged 15 years and over	Total stated
+
+#306	2018	sources of personal income    No source of income during that time
+#307	2018	sources of personal income    Wages, salary, commissions, bonuses etc paid by my employer
+#308	2018	sources of personal income    Self-employment or business I own and work in
+#309	2018	sources of personal income    Interest, dividends, rent, other investments
+#310	2018	sources of personal income    Regular payments from ACC or a private work accident insurer
+#311	2018	sources of personal income    New Zealand Superannuation or Veteran's Pension
+#312	2018	sources of personal income    Other superannuation, pensions, or annuities 
+#313	2018	sources of personal income    Jobseeker Support
+#314	2018	sources of personal income    Sole Parent Support
+#315	2018	sources of personal income    Supported Living Payment
+#316	2018	sources of personal income    Student Allowance
+#317	2018	sources of personal income    Other government benefits
+#318	2018	sources of personal income    Other sources of income
+#319	2018	sources of personal income    total responses aged 15 years and over	Total stated
+
+# calculate percentages
+qualifications.2018 <- census_individual_part2[c('sa1','c215','c216','c217','c218','c219','c220','c221','c222','c223','c224','c225','c226','c235','c236','c237','c238','c263','c264','c265','c266','c267','c268','c269','c270','c306','c307','c308','c309','c310','c311','c312','c313','c314','c315','c316','c317','c318','c319')]
+
+qualifications.2018$HSCert <- as.integer((qualifications.2018$c215/qualifications.2018$c226) * 100) + as.integer((qualifications.2018$c216/qualifications.2018$c226) * 100) + as.integer((qualifications.2018$c217/qualifications.2018$c226) * 100) + as.integer((qualifications.2018$c218/qualifications.2018$c226) * 100)
+
+qualifications.2018$HSDip <- as.integer((qualifications.2018$c219/qualifications.2018$c226) * 100) + as.integer((qualifications.2018$c220/qualifications.2018$c226) * 100)
+
+qualifications.2018$bachelor <- as.integer((qualifications.2018$c221/qualifications.2018$c226) * 100) + as.integer((qualifications.2018$c225/qualifications.2018$c226) * 100)
+
+qualifications.2018$postGrad <- as.integer((qualifications.2018$c222/qualifications.2018$c226) * 100) + as.integer((qualifications.2018$c223/qualifications.2018$c226) * 100) + as.integer((qualifications.2018$c224/qualifications.2018$c226) * 100)
+
+qualifications.2018$study.fullTime <- as.integer((qualifications.2018$c235/qualifications.2018$c238) * 100)
+qualifications.2018$study.partTime <- as.integer((qualifications.2018$c236/qualifications.2018$c238) * 100)
+qualifications.2018$study.no <- as.integer((qualifications.2018$c237/qualifications.2018$c238) * 100)
+
+qualifications.2018$income.less5K <- as.integer((qualifications.2018$c263/qualifications.2018$c270) * 100)
+qualifications.2018$income.5_10K <- as.integer((qualifications.2018$c264/qualifications.2018$c270) * 100)
+qualifications.2018$income.10_20K <- as.integer((qualifications.2018$c265/qualifications.2018$c270) * 100)
+qualifications.2018$income.20_30K <- as.integer((qualifications.2018$c266/qualifications.2018$c270) * 100)
+qualifications.2018$income.30_50K <- as.integer((qualifications.2018$c267/qualifications.2018$c270) * 100)
+qualifications.2018$income.50_70K <- as.integer((qualifications.2018$c268/qualifications.2018$c270) * 100)
+qualifications.2018$income.70KP <- as.integer((qualifications.2018$c269/qualifications.2018$c270) * 100)
+
+qualifications.2018$income.no <- as.integer((qualifications.2018$c306/qualifications.2018$c319) * 100)
+qualifications.2018$income.salary <- as.integer((qualifications.2018$c307/qualifications.2018$c319) * 100)
+qualifications.2018$income.selfEmp <- as.integer((qualifications.2018$c308/qualifications.2018$c319) * 100)
+qualifications.2018$income.interest <- as.integer((qualifications.2018$c309/qualifications.2018$c319) * 100)
+qualifications.2018$income.ACC <- as.integer((qualifications.2018$c310/qualifications.2018$c319) * 100)
+qualifications.2018$income.super <- as.integer((qualifications.2018$c311/qualifications.2018$c319) * 100) + as.integer((qualifications.2018$c312/qualifications.2018$c319) * 100)
+
+qualifications.2018$income.studentAll <- as.integer((qualifications.2018$c316/qualifications.2018$c319) * 100)
+
+qualifications.2018$income.supported <- as.integer((qualifications.2018$c315/qualifications.2018$c319) * 100) 
+qualifications.2018$income.jobSeeker <- as.integer((qualifications.2018$c313/qualifications.2018$c319) * 100)
+qualifications.2018$income.soleParent <- as.integer((qualifications.2018$c314/qualifications.2018$c319) * 100)
+qualifications.2018$income.otherBen <- as.integer((qualifications.2018$c317/qualifications.2018$c319) * 100)
+qualifications.2018$income.other <- as.integer((qualifications.2018$c318/qualifications.2018$c319) * 100)
+
+qualifications.2018$income.no[is.na(qualifications.2018$income.no)] = 0
+qualifications.2018$income.salary[is.na(qualifications.2018$income.salary)] = 0
+qualifications.2018$income.selfEmp[is.na(qualifications.2018$income.selfEmp)] = 0
+qualifications.2018$income.interest[is.na(qualifications.2018$income.interest)] = 0
+qualifications.2018$income.ACC[is.na(qualifications.2018$income.ACC)] = 0
+qualifications.2018$income.super[is.na(qualifications.2018$income.super)] = 0
+qualifications.2018$income.jobSeeker[is.na(qualifications.2018$income.jobSeeker)] = 
+qualifications.2018$income.soleParent[is.na(qualifications.2018$income.soleParent)] = 0
+qualifications.2018$income.supported[is.na(qualifications.2018$income.supported)] = 0
+qualifications.2018$income.studentAll[is.na(qualifications.2018$income.studentAll)] = 0
+qualifications.2018$income.other[is.na(qualifications.2018$income.other)] = 0
+qualifications.2018$income.otherBen[is.na(qualifications.2018$income.otherBen)] = 0
+
+qualifications.2018$HSCert[is.na(qualifications.2018$HSCert)] = 0
+qualifications.2018$HSDip[is.na(qualifications.2018$HSDip)] = 0
+qualifications.2018$bachelor[is.na(qualifications.2018$bachelor)] = 0
+qualifications.2018$postGrad[is.na(qualifications.2018$postGrad)] = 0
+
+qualifications.2018$study.fullTime[is.na(qualifications.2018$study.fullTime)] = 0
+qualifications.2018$study.partTime[is.na(qualifications.2018$study.partTime)] = 0
+qualifications.2018$study.no[is.na(qualifications.2018$study.no)] = 0
+
+qualifications.2018$income.less5K[is.na(qualifications.2018$income.less5K)] = 0
+qualifications.2018$income.5_10K[is.na(qualifications.2018$income.5_10K)] = 0
+qualifications.2018$income.10_20K[is.na(qualifications.2018$income.10_20K)] = 0
+qualifications.2018$income.20_30K[is.na(qualifications.2018$income.20_30K)] = 0
+qualifications.2018$income.30_50K[is.na(qualifications.2018$income.30_50K)] = 0
+qualifications.2018$income.50_70K[is.na(qualifications.2018$income.50_70K)] = 0
+qualifications.2018$income.70KP[is.na(qualifications.2018$income.70KP)] = 0
+
+# join to FENZ data
+data_fenz_impacts_res_qualifications <- buildings_fenz_res_num_census %>% inner_join(qualifications.2018, by = c('SA12018_V1'='sa1'))
+
+data_fenz_impacts_res_qualifications <- subset(data_fenz_impacts_res_qualifications, select = -c(c215,c216,c217,c218,c219,c220,c221,c222,c223,c224,c225,c226,c235,c236,c237,c238,c263,c264,c265,c266,c267,c268,c269,c270,c306,c307,c308,c309,c310,c311,c312,c313,c314,c315,c316,c317,c318,c319))
+
+data_qualifications1 <- subset(data_fenz_impacts_res_qualifications, select = c(Percent_Saved,Damage_m2,Casualty_Count,Fatality_Count,Injury_Count,HSCert,HSDip,bachelor,postGrad,study.fullTime,study.partTime,study.no))
+
+data_qualifications2 <- subset(data_fenz_impacts_res_qualifications, select = c(Percent_Saved,Damage_m2,Casualty_Count,Fatality_Count,Injury_Count,income.less5K,income.5_10K,income.10_20K,income.20_30K,income.30_50K,income.50_70K,income.70KP))
+
+data_qualifications3 <- subset(data_fenz_impacts_res_qualifications, select = c(Percent_Saved,Damage_m2,Casualty_Count,Fatality_Count,Injury_Count,income.no,income.salary,income.selfEmp,income.interest,income.ACC,income.super,income.jobSeeker,income.soleParent,income.supported,income.studentAll,income.otherBen,income.other))
+
+#data_fenz_impacts_res_qualifications$NZDep2018 <- as.numeric(data_fenz_impacts_res_qualifications$NZDep2018)
+data_qualifications4 <- subset(data_fenz_impacts_res_qualifications, select = c(Percent_Saved,Damage_m2,Casualty_Count,Fatality_Count,Injury_Count,GNS_Storeys,NZDep2018,income.70KP))
+
+
+#include significance 
+# mat : is a matrix of data
+# ... : further arguments to pass to the native R cor.test function
+cor.mtest <- function(mat, ...) {
+    mat <- as.matrix(mat)
+    n <- ncol(mat)
+    p.mat<- matrix(NA, n, n)
+    diag(p.mat) <- 0
+    for (i in 1:(n - 1)) {
+        for (j in (i + 1):n) {
+            tmp <- cor.test(mat[, i], mat[, j], ...)
+            p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+        }
+    }
+  colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+  p.mat
+}
+# matrix of the p-value of the correlation
+p.mat1 <- cor.mtest(data_qualifications1)
+corrplot(cor(data_qualifications1),
+  p.mat = p.mat1,
+  sig.level = 0.1,
+  type = "upper",
+  addCoef.col = "black",
+  method = "color",
+  tl.srt = 75,
+  #tl.col = 'black',
+  tl.cex = 0.7,
+  diag = FALSE,
+  insig = "blank",
+  number.cex = 0.7
+)
+
+p.mat2 <- cor.mtest(data_qualifications2)
+corrplot(cor(data_qualifications2),
+  p.mat = p.mat2,
+  sig.level = 0.1,
+  type = "upper",
+  addCoef.col = "black",
+  method = "color",
+  tl.srt = 75,
+  #tl.col = 'black',
+  tl.cex = 0.7,
+  diag = FALSE,
+  insig = "blank",
+  number.cex = 0.7
+)
+
+p.mat3 <- cor.mtest(data_qualifications3)
+corrplot(cor(data_qualifications3),
+  p.mat = p.mat3,
+  sig.level = 0.1,
+  type = "upper",
+  addCoef.col = "black",
+  method = "color",
+  tl.srt = 75,
+  #tl.col = 'black',
+  tl.cex = 0.7,
+  diag = FALSE,
+  insig = "blank",
+  number.cex = 0.7
+)
+
+p.mat4 <- cor.mtest(na.omit(data_qualifications4))
+corrplot(cor(na.omit(data_qualifications4)),
+  p.mat = p.mat4,
+  sig.level = 0.1,
+  type = "upper",
+  addCoef.col = "black",
+  method = "color",
+  tl.srt = 75,
+  #tl.col = 'black',
+  tl.cex = 0.7,
+  diag = FALSE,
+  insig = "blank",
+  number.cex = 0.7
+)
+
+```
+
+Compare data frames
+```{r}
+
+library(ggplot2)
+
+to_compare_FENZ <- subset(buildings_fenz, select = c(Use_Category,Construction_Type_1,Wall_Const,Roof_Const,Roof_Pitch,Parapet,Assign_type,Age))
+to_compare_FENZ$dataset <- "FENZ"
+to_compare_FENZ <- rename(to_compare_FENZ, Construction_Type="Construction_Type_1")
+
+
+to_compare_GNS <- subset(buildings_gns, select = c(Use_Category,Construction_Type,Wall_Const,Roof_Const,Roof_Pitch,Parapet,Assign_type,Age))
+to_compare_GNS$dataset <- "GNS"
+
+to_compare <- bind_rows(to_compare_GNS,to_compare_FENZ)
+
+table(to_compare$dataset, to_compare$Use_Category)
+
+ggplot(to_compare) +
+  aes(x = dataset, fill = Use_Category) +
+  geom_bar(position = "fill")
+
+#test <- chisq.test(table(to_compare$dataset, to_compare$Use_Category))
+#test
+
+#test$statistic
+#test$p.value
+
+#summary(table(to_compare$dataset, to_compare$Use_Category))
+
+
+library(summarytools)
+library(dplyr)
+
+to_compare %$%
+  ctable(dataset, Use_Category,
+    prop = "r", chisq = TRUE, headings = FALSE
+  ) %>%
+  print(
+    method = "render",
+    style = "rmarkdown",
+    footnote = NA
+  )
+
+to_compare %$%
+  ctable(dataset, Construction_Type,
+    prop = "r", chisq = TRUE, headings = FALSE
+  ) %>%
+  print(
+    method = "render",
+    style = "rmarkdown",
+    footnote = NA
+  )
+
+
+to_compare %$%
+  ctable(dataset, Wall_Const,
+    prop = "r", chisq = TRUE, headings = FALSE
+  ) %>%
+  print(
+    method = "render",
+    style = "rmarkdown",
+    footnote = NA
+  )
+
+to_compare %$%
+  ctable(dataset, Roof_Const,
+    prop = "r", chisq = TRUE, headings = FALSE
+  ) %>%
+  print(
+    method = "render",
+    style = "rmarkdown",
+    footnote = NA
+  )
+
+to_compare %$%
+  ctable(dataset, Roof_Pitch,
+    prop = "r", chisq = TRUE, headings = FALSE
+  ) %>%
+  print(
+    method = "render",
+    style = "rmarkdown",
+    footnote = NA
+  )
+
+to_compare %$%
+  ctable(dataset, Parapet,
+    prop = "r", chisq = TRUE, headings = FALSE
+  ) %>%
+  print(
+    method = "render",
+    style = "rmarkdown",
+    footnote = NA
+  )
+
+to_compare %$%
+  ctable(dataset, Assign_type,
+    prop = "r", chisq = TRUE, headings = FALSE
+  ) %>%
+  print(
+    method = "render",
+    style = "rmarkdown",
+    footnote = NA
+  )
+
+min(na.omit(to_compare$Age))
+max(na.omit(to_compare$Age))
+
+```
+
+
+
+
+Create frequency tables
+```{r}
+
+#install.packages('epiDisplay')
+library(epiDisplay)
+library(crosstable)
+
+# Construction type
+const1 <- tab1(buildings_gns_res$Construction_Type, sort.group = "decreasing", cum.percent = TRUE)
+const2 <- tab1(buildings_fenz_res$Construction_Type_1, sort.group = "decreasing", cum.percent = TRUE)
+const3 <- tab1(buildings_fenz_res_casulties$Construction_Type_1, sort.group = "decreasing", cum.percent = TRUE)
+const4 <- tab1(buildings_fenz_res_fatalities$Construction_Type_1, sort.group = "decreasing", cum.percent = TRUE)
+
+# Age (decades)
+age1 <- tab1(buildings_gns_res$Age, sort.group = "decreasing", cum.percent = TRUE)
+age2 <- tab1(buildings_fenz_res$Age, sort.group = "decreasing", cum.percent = TRUE)
+age3 <- tab1(buildings_fenz_res_casulties$Age, sort.group = "decreasing", cum.percent = TRUE)
+age4 <- tab1(buildings_fenz_res_fatalities$Age, sort.group = "decreasing", cum.percent = TRUE)
+
+
+write.table(const1,"const1.csv",sep=",")
+write.table(const2,"const2.csv",sep=",")
+write.table(const3,"const3.csv",sep=",")
+write.table(const4,"const4.csv",sep=",")
+
+write.table(age1,"age1.csv",sep=",")
+write.table(age2,"age2.csv",sep=",")
+write.table(age3,"age3.csv",sep=",")
+write.table(age4,"age4.csv",sep=",")
+
+```
+
+
+
+Look at distance to neighbour
+```{r}
+
+plot(buildings_res_fenz, aes(Casualty_Count,Neighbour_dist))
+
+```
+
+

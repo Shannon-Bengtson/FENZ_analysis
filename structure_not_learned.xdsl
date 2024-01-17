@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<smile version="1.0" id="Unnamed" numsamples="10000" discsamples="10000">
+	<nodes>
+		<cpt id="Numfloors">
+			<state id="High" />
+			<state id="Low" />
+			<state id="Medium" />
+			<probabilities>0.01244072303021885 0.7963451655786822 0.191214111391099</probabilities>
+		</cpt>
+		<cpt id="IncidentTypeName">
+			<state id="Structurefirewithdamage" />
+			<state id="Structurefirewithnodamage" />
+			<probabilities>0.9984051036682615 0.001594896331738437</probabilities>
+		</cpt>
+		<cpt id="DayofWeek">
+			<state id="Friday" />
+			<state id="Monday" />
+			<state id="Saturday" />
+			<state id="Sunday" />
+			<state id="Thursday" />
+			<state id="Tuesday" />
+			<state id="Wednesday" />
+			<probabilities>0.1420464691759757 0.1403400861128197 0.1548046588225957 0.1490307347368003 0.1366892200242068 0.1389313280025397 0.138157503125062</probabilities>
+		</cpt>
+		<cpt id="FlameDamageName">
+			<state id="Confinedtofirecelloforigin" />
+			<state id="Confinedtoflooroforigin" />
+			<state id="Confinedtoobjectoforigin" />
+			<state id="Confinedtopartofroomorareaoforigin" />
+			<state id="Confinedtoroomoforigin" />
+			<state id="Confinedtostructureoforigin" />
+			<state id="Extendedbeyondstructureoforigin" />
+			<state id="Nodamageofthistype" />
+			<probabilities>0.03218317823766344 0.04170717672969702 0.1858568622393302 0.3185975912220481 0.09424790174408222 0.2568106510049803 0.06688624774301077 0.003710391079188079</probabilities>
+		</cpt>
+		<cpt id="FloorAream2">
+			<state id="High" />
+			<state id="Low" />
+			<state id="Medium" />
+			<probabilities>0.04173669467787115 0.5280112044817927 0.4302521008403361</probabilities>
+		</cpt>
+		<cpt id="StructureAream2">
+			<state id="High" />
+			<state id="Low" />
+			<state id="Medium" />
+			<probabilities>0.9957805907172995 0.00210970464135021 0.00210970464135021</probabilities>
+		</cpt>
+		<cpt id="CriticalInjuryCount">
+			<state id="AtLeastOne" />
+			<state id="Zero" />
+			<probabilities>0.003055616182860771 0.9969443838171392</probabilities>
+		</cpt>
+		<cpt id="PercentofPropertySaved">
+			<state id="High" />
+			<state id="Low" />
+			<state id="Medium" />
+			<probabilities>0.7777777777777777 0.1111111111111111 0.1111111111111111</probabilities>
+		</cpt>
+		<cpt id="TimeofDay">
+			<state id="High" />
+			<state id="Low" />
+			<state id="Medium" />
+			<probabilities>0.3039030319400365 0.3557971503815248 0.3402998176784388</probabilities>
+		</cpt>
+		<cpt id="YearConstructedName">
+			<state id="S19001945" />
+			<state id="S19461969" />
+			<state id="S19701991" />
+			<state id="S19922005" />
+			<state id="S2006onwards" />
+			<state id="Pre1900" />
+			<state id="Unknown" />
+			<probabilities>0.1005773924085795 0.270064882239727 0.3368122383380623 0.1445663604436596 0.05625111609357328 0.009385106847358084 0.08234290362904026</probabilities>
+		</cpt>
+		<cpt id="ConstructionTypeName">
+			<state id="BrickBlocksetc" />
+			<state id="Heavytimber" />
+			<state id="Metalframeprotected" />
+			<state id="Metalframeunprotected" />
+			<state id="PlasticConstructioncompositeformed" />
+			<state id="PolystyreneBlocks" />
+			<state id="Reinforcedconcretetiltslab" />
+			<state id="Reinforcedconcretewithcombustiblecladding" />
+			<state id="Reinforcedconcretewithnoncombustiblecladding" />
+			<state id="Timberframeprotected" />
+			<state id="STimberframeunprotected_normalhousing_" />
+			<state id="Unabletoclassify" />
+			<state id="Unknown" />
+			<probabilities>0.1116133783680829 2.539553546486528e-05 0.0003555374965081139 0.01290093201615156 0.0003555374965081139 2.539553546486528e-05 0.0003555374965081139 0.01620235162658405 0.04888640576986567 0.06935520735454709 0.7342611168956499 0.001676105340681109 0.003987099067983849</probabilities>
+		</cpt>
+		<cpt id="AgeofPersonInvolvedName">
+			<state id="Nopersoninvolved" />
+			<state id="NotRecorded" />
+			<state id="Persons10yearsorunder" />
+			<state id="Persons1118yrs" />
+			<state id="Persons1964yrs" />
+			<state id="SPersons65_yrs" />
+			<state id="Unknown" />
+			<probabilities>0.04545454545454546 0.02597402597402598 0.03246753246753247 0.04545454545454546 0.7012987012987013 0.06493506493506494 0.08441558441558442</probabilities>
+		</cpt>
+		<cpt id="EthnicityName">
+			<state id="African" />
+			<state id="SAsian_Indian" />
+			<state id="Chinese" />
+			<state id="SEuropean_Pakeha" />
+			<state id="Informationnotrecorded" />
+			<state id="SLatinAmerican_Hispanic" />
+			<state id="Maori" />
+			<state id="MiddleEastern" />
+			<state id="Nopersoninvolved" />
+			<state id="Other" />
+			<state id="OtherAsian" />
+			<state id="OtherEuropean" />
+			<state id="PacificIsland" />
+			<state id="SouthEastAsian" />
+			<state id="Unknown" />
+			<probabilities>8.816009873931059e-06 0.0005377766023097946 8.816009873931059e-06 0.003050339416380147 0.1137353433835846 8.816009873931059e-06 0.001066737194745658 8.816009873931059e-06 0.8204266948778983 0.004637221193687738 8.816009873931059e-06 8.816009873931059e-06 0.0006700167504187605 8.816009873931059e-06 0.05581415851185754</probabilities>
+		</cpt>
+		<cpt id="SpecificPropertyUseGroupParentName">
+			<state id="Assembly" />
+			<state id="Commercial" />
+			<state id="Educational" />
+			<state id="SHealthcare_Institutional" />
+			<state id="Manufacturing" />
+			<state id="Miscellaneous" />
+			<state id="NotRecorded" />
+			<state id="PrimaryIndustriesandUtilities" />
+			<state id="Residential" />
+			<state id="Storage" />
+			<probabilities>0.004545454545454545 0.004545454545454545 0.004545454545454545 0.004545454545454545 0.004545454545454545 0.004545454545454545 0.004545454545454545 0.004545454545454545 0.959090909090909 0.004545454545454545</probabilities>
+		</cpt>
+		<cpt id="GeneralPropertyUseGroupName">
+			<state id="CommercialRetailManufacturingStorage" />
+			<state id="CommunicationsResearch" />
+			<state id="ConstructionRenovation" />
+			<state id="Educational" />
+			<state id="HealthInstitutional" />
+			<state id="NoAddress" />
+			<state id="Other" />
+			<state id="RecreationalAssembly" />
+			<state id="Residential" />
+			<state id="RuralFarmingForests" />
+			<state id="Transportation" />
+			<state id="UtilitiesDisposal" />
+			<state id="WaterAreas" />
+			<probabilities>0.1730769230769231 0.1730769230769231 0.006410256410256413 0.08974358974358976 0.006410256410256413 0.006410256410256413 0.006410256410256413 0.5064102564102565 0.006410256410256413 0.006410256410256413 0.006410256410256413 0.006410256410256413 0.006410256410256413</probabilities>
+		</cpt>
+		<cpt id="FireCauseGroupName">
+			<state id="CarelessnesswithHeatSource" />
+			<state id="CarelessnesswithMaterialIgnited" />
+			<state id="DeliberatelyLitFire" />
+			<state id="DesignConstructionInstallationFault" />
+			<state id="MechanicalFailureorMalfunction" />
+			<state id="NaturalCauses" />
+			<state id="NotRecorded" />
+			<state id="OperatingFailure" />
+			<state id="OtherorUndeterminedCause" />
+			<state id="SReckless_involvingfire_" />
+			<probabilities>0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.55</probabilities>
+		</cpt>
+		<cpt id="HeatSourceGroupName">
+			<state id="CigarettesMatchesandCandles" />
+			<state id="ElectricalEquipment" />
+			<state id="ExplosivesFireWorks" />
+			<state id="ExposureFire" />
+			<state id="GasorLiquidFuelPoweredEquipment" />
+			<state id="HotObject" />
+			<state id="NaturalSource" />
+			<state id="NotRecorded" />
+			<state id="OutsideFire" />
+			<state id="SolidFuelledPoweredEquipment" />
+			<state id="UnabletoClassify" />
+			<probabilities>0.2611666901507679 0.3758630407214316 0.006692968860081725 0.02747639847823024 0.08609271523178809 0.1570381851486544 0.002465830632661688 0.01373819923911512 0.02613780470621389 0.02550373397210089 0.01782443285895449</probabilities>
+		</cpt>
+		<cpt id="OriginGroupName">
+			<state id="LivingArea" />
+			<state id="MeansofEgress" />
+			<state id="NotRecorded" />
+			<state id="OutsideAreaMultipleArea" />
+			<state id="SalesandAssemblyArea" />
+			<state id="ServiceFacility" />
+			<state id="ServiceorEquipmentArea" />
+			<state id="StorageandGarageArea" />
+			<state id="StructuralRoofCeilingArea" />
+			<state id="TechnicalManufacturingArea" />
+			<state id="UnabletoClassify" />
+			<state id="VehicleArea" />
+			<probabilities>0.241505722460658 0.0344241773962804 8.941344778254647e-05 0.07948855507868381 0.09021816881258939 0.005454220314735335 0.03227825464949928 0.1524499284692417 0.3391452074391988 0.00330829756795422 0.01832975679542203 0.00330829756795422</probabilities>
+		</cpt>
+		<cpt id="FlameDamagem2">
+			<state id="High" />
+			<state id="Low" />
+			<state id="Medium" />
+			<probabilities>0.02941176470588235 0.8676470588235294 0.1029411764705882</probabilities>
+		</cpt>
+		<cpt id="ModerateInjuryCount">
+			<state id="AtLeastOne" />
+			<state id="Zero" />
+			<probabilities>0.01435406698564593 0.9856459330143541</probabilities>
+		</cpt>
+		<cpt id="MinorInjuryCount">
+			<state id="AtLeastOne" />
+			<state id="Zero" />
+			<probabilities>0.004728132387706856 0.9952718676122931</probabilities>
+		</cpt>
+		<cpt id="CasualtyCount">
+			<state id="AtLeastOne" />
+			<state id="Zero" />
+			<probabilities>0.5 0.5</probabilities>
+		</cpt>
+		<cpt id="FatalityCount">
+			<state id="AtLeastOne" />
+			<state id="Zero" />
+			<probabilities>0.5 0.5</probabilities>
+		</cpt>
+		<cpt id="SeriousInjuryCount">
+			<state id="AtLeastOne" />
+			<state id="Zero" />
+			<probabilities>0.000536480686695279 0.9994635193133047</probabilities>
+		</cpt>
+		<cpt id="MeshblockID2018">
+			<state id="High" />
+			<state id="Low" />
+			<state id="Medium" />
+			<probabilities>0.24 0.496 0.264</probabilities>
+		</cpt>
+		<cpt id="FirstArrivalTime">
+			<state id="High" />
+			<state id="Low" />
+			<state id="Medium" />
+			<probabilities>0.1666666666666667 0.6666666666666667 0.1666666666666667</probabilities>
+		</cpt>
+	</nodes>
+	<extensions>
+		<genie version="1.0" app="GeNIe 4.0.3005.2 1d997c67c5e1680" name="Unnamed">
+			<node id="IncidentTypeName">
+				<name>IncidentTypeName</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>618 130 788 228</position>
+			</node>
+			<node id="DayofWeek">
+				<name>DayofWeek</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>1197 10 1367 108</position>
+			</node>
+			<node id="TimeofDay">
+				<name>TimeofDay</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>209 214 379 312</position>
+			</node>
+			<node id="GeneralPropertyUseGroupName">
+				<name>GeneralPropertyUseGroupName</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>677 604 847 702</position>
+			</node>
+			<node id="SpecificPropertyUseGroupParentName">
+				<name>SpecificPropertyUseGroupParentName</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>205 398 375 496</position>
+			</node>
+			<node id="YearConstructedName">
+				<name>YearConstructedName</name>
+				<interior color="333333" />
+				<outline color="0000bb" />
+				<font color="ffffff" name="Arial" size="8" />
+				<position>471 203 641 301</position>
+			</node>
+			<node id="ConstructionTypeName">
+				<name>ConstructionTypeName</name>
+				<interior color="333333" />
+				<outline color="0000bb" />
+				<font color="ffffff" name="Arial" size="8" />
+				<position>412 305 582 403</position>
+			</node>
+			<node id="FireCauseGroupName">
+				<name>FireCauseGroupName</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>209 536 379 634</position>
+			</node>
+			<node id="HeatSourceGroupName">
+				<name>HeatSourceGroupName</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>145 623 315 721</position>
+			</node>
+			<node id="OriginGroupName">
+				<name>OriginGroupName</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>427 379 597 477</position>
+			</node>
+			<node id="AgeofPersonInvolvedName">
+				<name>AgeofPersonInvolvedName</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>95 733 265 831</position>
+			</node>
+			<node id="EthnicityName">
+				<name>EthnicityName</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>77 542 247 640</position>
+			</node>
+			<node id="FlameDamageName">
+				<name>FlameDamageName</name>
+				<interior color="ff0000" />
+				<outline color="0000bb" />
+				<font color="ffffff" name="Arial" size="8" />
+				<position>558 404 728 502</position>
+			</node>
+			<node id="PercentofPropertySaved">
+				<name>PercentofPropertySaved</name>
+				<interior color="ff0000" />
+				<outline color="0000bb" />
+				<font color="ffffff" name="Arial" size="8" />
+				<position>677 362 847 460</position>
+			</node>
+			<node id="FlameDamagem2">
+				<name>FlameDamagem2</name>
+				<interior color="ff0000" />
+				<outline color="0000bb" />
+				<font color="ffffff" name="Arial" size="8" />
+				<position>471 28 641 126</position>
+			</node>
+			<node id="FloorAream2">
+				<name>FloorAream2</name>
+				<interior color="333333" />
+				<outline color="0000bb" />
+				<font color="ffffff" name="Arial" size="8" />
+				<position>932 15 1102 113</position>
+			</node>
+			<node id="Numfloors">
+				<name>Numfloors</name>
+				<interior color="333333" />
+				<outline color="0000bb" />
+				<font color="ffffff" name="Arial" size="8" />
+				<position>898 149 1068 247</position>
+			</node>
+			<node id="StructureAream2">
+				<name>StructureAream2</name>
+				<interior color="333333" />
+				<outline color="0000bb" />
+				<font color="ffffff" name="Arial" size="8" />
+				<position>699 58 869 156</position>
+			</node>
+			<node id="CasualtyCount">
+				<name>CasualtyCount</name>
+				<interior color="ffff00" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>1292 376 1462 474</position>
+			</node>
+			<node id="FatalityCount">
+				<name>FatalityCount</name>
+				<interior color="ffff00" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>1227 632 1397 730</position>
+			</node>
+			<node id="CriticalInjuryCount">
+				<name>CriticalInjuryCount</name>
+				<interior color="ffff00" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>1338 509 1508 607</position>
+			</node>
+			<node id="SeriousInjuryCount">
+				<name>SeriousInjuryCount</name>
+				<interior color="ffff00" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>1180 393 1350 491</position>
+			</node>
+			<node id="ModerateInjuryCount">
+				<name>ModerateInjuryCount</name>
+				<interior color="ffff00" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>1287 234 1457 332</position>
+			</node>
+			<node id="MinorInjuryCount">
+				<name>MinorInjuryCount</name>
+				<interior color="ffff00" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>1222 453 1392 551</position>
+			</node>
+			<node id="MeshblockID2018">
+				<name>MeshblockID2018</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>37 351 207 449</position>
+			</node>
+			<node id="FirstArrivalTime">
+				<name>FirstArrivalTime</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="Arial" size="8" />
+				<position>963 326 1133 424</position>
+			</node>
+		</genie>
+	</extensions>
+</smile>

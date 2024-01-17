@@ -1,0 +1,165 @@
+---
+title: "FENZ building fire"
+author: "Christina Magill"
+date: '`r Sys.Date()`'
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview
+
+Analysis was carried out using:
+
+1.  FENZ building fire call-out data (2003 - 2022)
+2.  GNS building database (2022)
+3.  Census data (2018, 2013, 2006) at SA1 level
+
+Analysis was carried out in two steps:
+
+1.  Fire occurrence (i.e. probability of occurring in FENZ dataset)
+2.  Fire severity (area of damage, percentage of building saved, casualties, fatalities, injuries)
+
+```{r import, echo=FALSE}
+
+buildings_fenz <- read.csv("../FENZ with building data/FENZIncidentsBuildings_new_MeshblockIDs_NZDep.csv")  # FENZ + GNS
+buildings_gns <- read.csv("Buildings/Buildings_AllNZ_AllColumns.csv")   
+
+```
+
+## Use categories
+
+```{r use categories, echo=FALSE}
+
+library(ggplot2)
+#library(dplyr)
+#library(tidyr)
+
+to_compare_FENZ <- subset(buildings_fenz, select = c(Use_Category,Construction_Type_1,Wall_Const,Roof_Const,Roof_Pitch,Parapet,Assign_type,Age))
+to_compare_FENZ$dataset <- "FENZ"
+to_compare_FENZ <- rename(to_compare_FENZ, Construction_Type="Construction_Type_1")
+
+
+to_compare_GNS <- subset(buildings_gns, select = c(Use_Category,Construction_Type,Wall_Const,Roof_Const,Roof_Pitch,Parapet,Assign_type,Age))
+to_compare_GNS$dataset <- "GNS"
+
+to_compare <- bind_rows(to_compare_GNS,to_compare_FENZ)
+
+#table(to_compare$dataset, to_compare$Use_Category)
+
+ggplot(to_compare) +
+  aes(x = dataset, fill = Use_Category) +
+  geom_bar(position = "fill")
+
+
+
+```
+
+## Chi-square analysis building categorical data
+
+Records with < 5 in category removed  
+Records with no category recorded removed  
+Parapets excluded  
+
+```{r chi-square, echo=FALSE}
+
+library(summarytools)
+library(dplyr)
+library(rmarkdown)
+
+# Use Category
+subset(to_compare, Use_Category!="" & Use_Category!="Clear Site") %$%
+  ctable(Use_Category,dataset,
+    prop = "c", chisq = TRUE, headings = FALSE
+  ) %>%
+  print(
+    method = "render",
+    style = "latex",
+    footnote = NA
+  )
+
+subset(to_compare, Construction_Type!="") %$%
+  ctable(Construction_Type, dataset,
+    prop = "c", chisq = TRUE, headings = FALSE
+  ) %>%
+  print(
+    method = "render",
+    style = "rmarkdown",
+    footnote = NA
+  )
+
+subset(to_compare, Wall_Const!="") %$%
+  ctable(Wall_Const, dataset,
+    prop = "c", chisq = TRUE, headings = FALSE
+  ) %>%
+  print(
+    method = "render",
+    style = "rmarkdown",
+    footnote = NA
+  )
+
+subset(to_compare, Roof_Const!="") %$%
+  ctable(Roof_Const, dataset,
+    prop = "c", chisq = TRUE, headings = FALSE
+  ) %>%
+  print(
+    method = "render",
+    style = "rmarkdown",
+    footnote = NA
+  )
+
+subset(to_compare, Roof_Pitch!="") %$%
+  ctable(Roof_Pitch, dataset,
+    prop = "c", chisq = TRUE, headings = FALSE
+  ) %>%
+  print(
+    method = "render",
+    style = "rmarkdown",
+    footnote = NA
+  )
+
+#to_compare %$%
+#  ctable(dataset, Parapet,
+#    prop = "r", chisq = TRUE, headings = FALSE
+#  ) %>%
+#  print(
+#    method = "render",
+#    style = "rmarkdown",
+#    footnote = NA
+#  )
+
+#to_compare %$%
+#  ctable(dataset, Assign_type,
+#    prop = "r", chisq = TRUE, headings = FALSE
+#  ) %>%
+#  print(
+#    method = "render",
+#    style = "rmarkdown",
+#    footnote = NA
+#  )
+
+```
+
+
+
+
+```         
+  Based on categorical data, relative probability of occurrance based on building characteristics.  
+  Although fire occurrance dependent on both building and demographic characterisitcs, we were only able to utilise data available for the entire country at building level. 
+```
+
+## Fire severity
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+#plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

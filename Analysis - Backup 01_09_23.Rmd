@@ -1,0 +1,228 @@
+---
+title: "Analysis"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+
+
+data_fenz <- read.csv("FENZStructureFiredata_with2018MeshblockIDs.csv")
+census_dwellings <- read.csv("Census/2018-SA1-dataset-dwellings-total-NZ_Formatted.csv")
+census_dwellings_header <- read.csv("Census/Headers_dwellings.csv")
+mb_sa1 <- read.csv("2018CensusMeshblock_and_correspondingSA1_IDs.csv")
+
+
+```
+
+```{r}
+
+# Extract impact data from FENZ info
+
+#colnames(data_fenz)
+
+data_fenz_impacts <- data_fenz[c(
+  'Incident_ID',
+  'First_Arrival_Time',
+  'Incident_Type_Name',
+  'General_Property_Use_Group_Name',     
+  'General_Property_Use_Name',      
+  'Specific_Property_Use_Group_Parent_Name',
+  'Specific_Property_Use_Group_Name',
+  'Specific_Property_Use_Name',
+  'Fire_Cause_Group_Name',
+  'Heat_Source_Group_Name',
+  'Origin_Group_Name',
+  'Flame_Damage_Name',           
+  'Percent_of_Property_Saved_Name',
+  'Flame_Damage__m2_',
+  'Floor_Area__m2_',
+  'Numfloors',
+  'Structure_Area__m2_',              
+  'Casualty_Count',
+  'Fatality_Count',                
+  'Critical_Injury_Count',
+  'Serious_Injury_Count',           
+  'Moderate_Injury_Count',
+  'Minor_Injury_Count',                  
+  'Unclassified_Injury_Count',
+  'MeshblockID2018'
+)]
+
+
+# Add SA1 info
+library(dplyr)
+data_fenz_impacts <- data_fenz_impacts %>% inner_join( mb_sa1, 
+        by = c('MeshblockID2018'='MB2018_V1_'))
+
+
+# Extract residential
+unique(data_fenz_impacts$General_Property_Use_Group_Name)
+data_fenz_impacts_res <- data_fenz_impacts[data_fenz_impacts$General_Property_Use_Group_Name == 'Residential',]
+
+
+
+
+```
+
+```{r}
+
+# Analyse FENZ impact data (residential)
+
+  hist(data_fenz_impacts_res$Casualty_Count)
+  hist(data_fenz_impacts_res$Fatality_Count)
+  
+  #event_with_casulties
+  
+  sum(data_fenz_impacts_res$Casualty_Count)                                                                       # total casualties
+  sum(data_fenz_impacts_res$Casualty_Count > 0, na.rm=TRUE)                                                       # event count with casualties
+  percentage_events_casualties <- (sum(data_fenz_impacts_res$Casualty_Count > 0, na.rm=TRUE)/length(data_fenz_impacts_res$Casualty_Count)) * 100  
+  percentage_events_fatalities <- (sum(data_fenz_impacts_res$Fatality_Count > 0, na.rm=TRUE)/length(data_fenz_impacts_res$Fatality_Count)) * 100  
+
+
+```
+
+
+
+```{r}
+
+# Analysis 1
+# 11	2018	occupied private dwelling type	Separate house
+# 12	2018	occupied private dwelling type	Joined dwelling
+# 13	2018	occupied private dwelling type	Other private dwelling
+# 14	2018	occupied private dwelling type	Private dwelling not further defined
+# 15	2018	occupied private dwelling type	Total
+
+# calculate percentages
+dwellingType.2018 <- census_dwellings[c('SA1','c11','c12','c13','c14','c15')]
+dwellingType.2018$separateHouse <- as.integer((dwellingType.2018$c11/dwellingType.2018$c15) * 100)
+dwellingType.2018$joinedDwelling <- as.integer((dwellingType.2018$c12/dwellingType.2018$c15) * 100)
+dwellingType.2018$other <- as.integer((dwellingType.2018$c13/dwellingType.2018$c15) * 100)
+dwellingType.2018$notDefined <- as.integer((dwellingType.2018$c14/dwellingType.2018$c15) * 100)
+
+#plot
+hist(dwellingType.2018$separateHouse)
+hist(dwellingType.2018$joinedDwelling)
+hist(dwellingType.2018$other)
+hist(dwellingType.2018$notDefined)
+
+# join to FENZ data
+data_fenz_impacts_res_dwellingType <- data_fenz_impacts_res %>% inner_join( dwellingType.2018, 
+        by = c('SA12018_V1'='SA1'))
+
+
+min_percentage <- c(0,10,20,30,40,50,60,70,80,90)
+max_percentage <- c(10,20,30,40,50,60,70,80,90,100)
+bin <- c("0-10%","10-20%","20-30%","30-40%","40-50%","50-60%","60-70%","70-80%","80-90%","90-100%")
+
+stats <- data.frame(bin)
+
+
+for (i in 1:length(min_percentage)) { 
+    
+  # Seperate house
+  stats$casualties.separateHouse[i] <-
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$Casualty_Count > 0 &
+    data_fenz_impacts_res_dwellingType$separateHouse > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$separateHouse <= max_percentage[i], ]) /
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$separateHouse > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$separateHouse <= max_percentage[i], ]) * 100
+  stats$casualities.separateHouse.n[i] <-
+    nrow(data_fenz_impacts_res_dwellingType[data_fenz_impacts_res_dwellingType$Casualty_Count > 0 &
+    data_fenz_impacts_res_dwellingType$separateHouse > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$separateHouse <= max_percentage[i], ])
+  
+  stats$fatalities.separateHouse[i] <-
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$Fatality_Count > 0 &
+    data_fenz_impacts_res_dwellingType$separateHouse > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$separateHouse <= max_percentage[i], ]) /
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$separateHouse > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$separateHouse <= max_percentage[i], ]) * 100
+  stats$fatalities.separateHouse.n[i] <-
+    nrow(data_fenz_impacts_res_dwellingType[data_fenz_impacts_res_dwellingType$Fatality_Count > 0 &
+    data_fenz_impacts_res_dwellingType$separateHouse > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$separateHouse <= max_percentage[i], ])
+  
+  # Joined dwellings
+  stats$casualties.joinedDwelling[i] <-
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$Casualty_Count > 0 &
+    data_fenz_impacts_res_dwellingType$joinedDwelling > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$joinedDwelling <= max_percentage[i], ]) /
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$joinedDwelling > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$joinedDwelling <= max_percentage[i], ]) * 100
+  stats$casualities.joinedDwelling.n[i] <-
+    nrow(data_fenz_impacts_res_dwellingType[data_fenz_impacts_res_dwellingType$Casualty_Count > 0 &
+    data_fenz_impacts_res_dwellingType$joinedDwelling > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$joinedDwelling <= max_percentage[i], ])
+  
+  stats$fatalities.joinedDwelling[i] <-
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$Fatality_Count > 0 &
+    data_fenz_impacts_res_dwellingType$joinedDwelling > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$joinedDwelling <= max_percentage[i], ]) /
+    nrow(data_fenz_impacts_res_dwellingType
+    [data_fenz_impacts_res_dwellingType$joinedDwelling > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$joinedDwelling <= max_percentage[i], ]) * 100
+  stats$fatalities.joinedDwelling.n[i] <-
+    nrow(data_fenz_impacts_res_dwellingType[data_fenz_impacts_res_dwellingType$Fatality_Count > 0 &
+    data_fenz_impacts_res_dwellingType$joinedDwelling > min_percentage[i] &
+    data_fenz_impacts_res_dwellingType$joinedDwelling <= max_percentage[i], ])
+    
+}
+
+#Plots
+library(ggplot2)
+library(ggrepel)
+
+# Separate house / casualties
+ggplot(stats, aes(bin,casualties.separateHouse)) +
+  geom_point() +
+  geom_text_repel(aes(label = casualities.separateHouse.n), size=3) +
+  xlab("% of seperate houses in SA1") + ylab("% of events with casualties") +
+  geom_hline(yintercept=percentage_events_casualties, linetype="dashed", color = "red") 
+
+# Seperate / fatalities
+ggplot(stats, aes(bin,fatalities.separateHouse)) +
+  geom_point() +
+  geom_text_repel(aes(label = fatalities.separateHouse.n), size=3) +
+  xlab("% of seperate houses in SA1") + ylab("% of events with fatalities") +
+  geom_hline(yintercept=percentage_events_fatalities, linetype="dashed", color = "red") 
+
+# Joined dwellings / casualties
+ggplot(stats, aes(bin,casualties.joinedDwelling)) +
+  geom_point() +
+  geom_text_repel(aes(label = casualities.joinedDwelling.n), size=3) +
+  xlab("% of joined dwellings in SA1") + ylab("% of events with casualties") +
+  geom_hline(yintercept=percentage_events_casualties, linetype="dashed", color = "red") 
+
+# Joined dwellings / fatalities
+ggplot(stats, aes(bin,fatalities.joinedDwelling)) +
+  geom_point() +
+  geom_text_repel(aes(label = fatalities.joinedDwelling.n), size=3) +
+  xlab("% of joined dwellings in SA1") + ylab("% of events with fatalities") +
+  geom_hline(yintercept=percentage_events_fatalities, linetype="dashed", color = "red") 
+
+
+
+
+
+
+
+```
+
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
