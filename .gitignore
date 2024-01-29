@@ -12,3 +12,10 @@ __*
 *checkpoi*
 .Rhistory
 .RDataTmp
+statsnz-*
+*shp
+*shx
+*xml
+*prj
+*dbf
+*cpg
